@@ -97,7 +97,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
               <h2 className="text-3xl font-bold text-gray-800 mb-2">Hesabınıza Giriş Yapın</h2>
               <p className="text-gray-600 text-sm">Sağlık yolculuğunuza devam edin</p>
             </div>
-            <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+            <form
+              className="space-y-5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                window.location.href = '/dashboard';
+              }}
+            >
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   E-posta Adresi <span className="text-red-500">*</span>
