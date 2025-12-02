@@ -1,0 +1,7 @@
+{
+  "name": "EgzersizLab",
+  "description": "Türkiye'nin fizyoterapi ve egzersiz alanına özel online eğitim platformu. Bildiğini paylaş, bilmediğini öğren.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

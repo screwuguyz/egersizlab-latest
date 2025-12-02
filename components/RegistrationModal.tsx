@@ -1,0 +1,192 @@
+import React, { useState } from 'react';
+
+interface RegistrationModalProps {
+  onClose: () => void;
+}
+
+const RegistrationModal: React.FC<RegistrationModalProps> = ({ onClose }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const heroBackgroundStyle = {
+    backgroundImage:
+      'linear-gradient(135deg, rgba(102,126,234,0.95), rgba(118,75,162,0.95)), url("https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=900&q=80")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+      <style>{`
+        .floating-icon { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .input-field:focus {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .checkbox-custom {
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border: 2px solid #d1d5db;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+        .checkbox-custom:checked {
+          background-color: #667eea;
+          border-color: #667eea;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M5 13l4 4L19 7'%3E%3C/path%3E%3C/svg%3E");
+          background-size: 16px;
+          background-position: center;
+          background-repeat: no-repeat;
+        }
+        .registration-submit {
+          position: relative;
+          overflow: hidden;
+        }
+        .registration-submit::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+          transition: left 0.6s ease;
+        }
+        .registration-submit:hover::before { left: 100%; }
+      `}</style>
+      <div className="bg-white w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-2">
+        {/* Left */}
+        <div className="text-white p-8 md:p-10 flex items-center" style={heroBackgroundStyle}>
+          <div className="space-y-6 max-w-md">
+            <div className="floating-icon">
+              <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold leading-tight">Ağrısız bir yaşama ilk adımı atıyorsunuz</h1>
+            <p className="text-lg opacity-90">
+              Profesyonel fizyoterapistlerimiz, size özel egzersiz programlarıyla sağlıklı yaşamınızı destekliyor.
+            </p>
+            <div className="space-y-3 pt-4">
+              {[
+                'Kişiye özel egzersiz programları',
+                '7/24 Dijital Erişim imkanı',
+                'Uzman fizyoterapist danışmanlığı',
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-3">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right */}
+        <div className="p-8 md:p-10 bg-gray-50 relative">
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 text-gray-500 hover:text-gray-700 transition text-xl"
+            aria-label="Kapat"
+          >
+            ×
+          </button>
+          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-1">Hesap Oluştur</h2>
+              <p className="text-gray-600 text-sm">Sağlıklı yaşam yolculuğunuza başlayın</p>
+            </div>
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Ad Soyad <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  className="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                  placeholder="Adınız ve Soyadınız"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  E-posta Adresi <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  className="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                  placeholder="ornek@email.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Telefon <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  required
+                  className="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                  placeholder="0555 555 55 55"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Şifre Oluştur <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    className="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                    placeholder="En az 6 karakter"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-sm"
+                  >
+                    {showPassword ? 'Gizle' : 'Göster'}
+                  </button>
+                </div>
+              </div>
+              <div className="pt-2">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" required className="checkbox-custom mt-1" />
+                  <span className="text-sm text-gray-600 leading-relaxed">
+                    <a href="#" className="text-purple-600 hover:underline font-semibold">KVKK</a> ve{' '}
+                    <a href="#" className="text-purple-600 hover:underline font-semibold">Aydınlatma Metni</a>
+                    'ni okudum, kabul ediyorum.
+                  </span>
+                </label>
+              </div>
+              <button
+                type="submit"
+                className="registration-submit w-full py-3 text-white font-bold rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 mt-4"
+              >
+                Hesabımı Oluştur ve Değerlendirmeye Başla
+              </button>
+            </form>
+            <div className="mt-5 text-center text-sm text-gray-600">
+              Zaten hesabınız var mı?{' '}
+              <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
+                Giriş Yapın
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RegistrationModal;
