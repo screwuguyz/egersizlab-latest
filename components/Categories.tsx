@@ -1,5 +1,6 @@
 import React from 'react';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
+import { CartItem } from '@/types';
 
 const packages = [
   {
@@ -49,7 +50,11 @@ const packages = [
   },
 ];
 
-const Categories = () => {
+interface CategoriesProps {
+  onAddToCart: (item: CartItem) => void;
+}
+
+const Categories: React.FC<CategoriesProps> = ({ onAddToCart }) => {
   return (
     <section
       id="packages"
@@ -110,7 +115,10 @@ const Categories = () => {
                   </li>
                 ))}
               </ul>
-              <button className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow-md transition">
+              <button
+                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow-md transition"
+                onClick={() => onAddToCart({ id: pkg.id, title: pkg.title, price: pkg.price })}
+              >
                 Sepete Ekle
               </button>
             </div>

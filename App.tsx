@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import CourseCard from './components/CourseCard';
 import GeminiAssistant from './components/GeminiAssistant';
@@ -8,7 +8,7 @@ import FeaturesBar from './components/FeaturesBar';
 import KnowledgeHub from './components/KnowledgeHub';
 import Categories from './components/Categories';
 import WebinarPromo from './components/WebinarPromo';
-import { Course } from './types';
+import { CartItem, Course } from './types';
 
 // Mock Data
 const courses: Course[] = [
@@ -63,13 +63,19 @@ const courses: Course[] = [
 ];
 
 function App() {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  const handleAddToCart = (item: CartItem) => {
+    setCartItems((prev) => [...prev, item]);
+  };
+
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Header />
+      <Header cartItems={cartItems} />
       <Hero />
       <KnowledgeHub />
       <FeaturesBar />
-      <Categories />
+      <Categories onAddToCart={handleAddToCart} />
 
       {/* Popular Courses */}
       <PopularCourses courses={courses} />

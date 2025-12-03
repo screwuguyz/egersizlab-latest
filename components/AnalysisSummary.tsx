@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface AnalysisSummaryProps {
   open: boolean;
   onClose: () => void;
+  onAddToCart?: (item: { id: string; title: string; price: string }) => void;
 }
 
 const packages = [
@@ -64,13 +65,13 @@ const clinicalTests = [
     desc: "Hangi kaslarınız zayıf, hangileri aşırı çalışıyor? (Gluteal amnezi, core stabilizasyonu vb.)",
   },
   {
-    icon: "🧪",
+    icon: "🤸‍♂️",
     title: "Kas Kısalık ve Esneklik Testleri",
     subtitle: "",
     desc: "Ağrınızın sebebi kas kısalığı mı? Hamstring, pektoral, iliopsoas, piriformis gerginlik testleri.",
   },
   {
-    icon: "🦴",
+    icon: "🦵",
     title: "Eklem Hareket Açıklığı",
     subtitle: "Gonyometrik analiz",
     desc: "Eklemler tam açıyla hareket ediyor mu, kısıtlılık derecesi nedir?",
@@ -82,25 +83,47 @@ const clinicalTests = [
     desc: "Ağrı kas kaynaklı mı yoksa sinir sıkışması mı (Fıtık/Siyatik)?",
   },
   {
-    icon: "⚖️",
+    icon: "🧭",
     title: "Fonksiyonel Denge ve Propriosepsiyon",
     subtitle: "",
     desc: "Vücudun uzaydaki konum algısı ve denge stratejisi.",
   },
   {
-    icon: "👣",
+    icon: "🦶",
     title: "Hareket Kalitesi Analizi",
     subtitle: "",
     desc: "Yürüme, eğilme ve uzanma sırasında omurga biyomekaniği kontrolü.",
   },
 ];
 
-const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ open, onClose }) => {
+const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ open, onClose, onAddToCart }) => {
+  const [showAdded, setShowAdded] = useState(false);
+
+  useEffect(() => {
+    let timer: number | undefined;
+    if (showAdded) {
+      timer = window.setTimeout(() => setShowAdded(false), 1800);
+    }
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [showAdded]);
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-0 overflow-hidden">
       <div className="relative w-[94vw] h-[86vh] max-w-none bg-white rounded-[28px] shadow-2xl border border-slate-100 overflow-hidden">
+        {showAdded && (
+          <div className="absolute top-4 inset-x-0 flex justify-center pointer-events-none">
+            <div className="bg-emerald-600 text-white font-semibold text-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 animate-fadeIn">
+              <span>🛒</span>
+              <span>Sepete eklendi</span>
+            </div>
+          </div>
+        )}
         <button
           onClick={onClose}
           className="absolute right-4 top-4 text-slate-500 hover:text-slate-700 text-2xl font-bold"
@@ -121,7 +144,7 @@ const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ open, onClose }) => {
               </div>
 
               <div className="flex flex-col items-center gap-2">
-                <div className="h-12 w-12 rounded-xl bg-white/30 flex items-center justify-center text-2xl">📤</div>
+                <div className="h-12 w-12 rounded-xl bg-white/30 flex items-center justify-center text-2xl">📩</div>
                 <div className="text-base font-bold text-center">Verileriniz Fizyoterapiste iletildi</div>
                 <div className="text-xs text-white/90 flex items-center gap-2">
                   <span className="text-emerald-200">✅</span>
@@ -153,7 +176,6 @@ const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ open, onClose }) => {
                   Paketini Seç
                 </button>
               </div>
-
             </div>
           </div>
 
@@ -182,7 +204,17 @@ const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ open, onClose }) => {
                       </li>
                     ))}
                   </ul>
-                  <button className="mt-3 w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-800 font-semibold py-2 hover:bg-slate-100 transition text-sm">
+                  <button
+                    className="mt-3 w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-800 font-semibold py-2 hover:bg-slate-100 transition text-sm"
+                    onClick={() => {
+                      onAddToCart?.({
+                        id: pkg.id,
+                        title: pkg.title,
+                        price: pkg.price,
+                      });
+                      setShowAdded(true);
+                    }}
+                  >
                     Sepete Ekle
                   </button>
                 </div>
@@ -206,7 +238,7 @@ const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ open, onClose }) => {
                       className="rounded-xl border border-slate-200 bg-slate-50 p-2 shadow-sm flex flex-col gap-1"
                     >
                       <div className="flex items-start gap-2">
-                        <span className="text-2xl inline-block motion-safe:animate-bounce transition-transform hover:scale-110 filter-none">{test.icon || '🩺'}</span>
+                        <span className="text-2xl inline-block motion-safe:animate-bounce transition-transform hover:scale-110 filter-none">{test.icon || '🧪'}</span>
                         <div className="filter-none">
                           <div className="text-base font-semibold text-slate-900 leading-tight blur-[1px] opacity-95">{test.title}</div>
                         </div>
@@ -238,21 +270,34 @@ const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ open, onClose }) => {
 
         {/* Arrows between columns (visible on lg and larger) */}
         <div aria-hidden className="hidden lg:block pointer-events-none">
-          <div className="absolute top-1/2 left-[33.333%] transform -translate-x-1/2 -translate-y-1/2">
-            <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-white/90 rounded-full text-indigo-600 ring-1 ring-indigo-200 opacity-95 motion-safe:animate-bounce">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="absolute top-1/2 left-[66.666%] transform -translate-x-1/2 -translate-y-1/2">
-            <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-white/90 rounded-full text-indigo-600 ring-1 ring-indigo-200 opacity-95 motion-safe:animate-bounce">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
+          <svg
+            className="absolute left-1/3 top-1/2 -translate-y-1/2 text-slate-300"
+            width="18"
+            height="120"
+            viewBox="0 0 18 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 0L17.6603 15H0.339746L9 0ZM7 15L7 120L11 120L11 15L7 15Z"
+              fill="currentColor"
+              fillOpacity="0.6"
+            />
+          </svg>
+          <svg
+            className="absolute right-1/3 top-1/2 -translate-y-1/2 text-slate-300"
+            width="18"
+            height="120"
+            viewBox="0 0 18 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 0L17.6603 15H0.339746L9 0ZM7 15L7 120L11 120L11 15L7 15Z"
+              fill="currentColor"
+              fillOpacity="0.6"
+            />
+          </svg>
         </div>
       </div>
     </div>

@@ -29,3 +29,9 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
 }
+
+export interface CartItem {
+  id: string;
+  title: string;
+  price: string;
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import AssessmentWizard from './AssessmentWizard';
 import AnalysisSummary from './AnalysisSummary';
+import { CartItem } from '@/types';
 
 type DashboardConfig = {
   user_name: string;
@@ -38,7 +39,7 @@ const defaultConfig: DashboardConfig = {
 };
 
 const Dashboard: React.FC = () => {
-  const [hasPackage, setHasPackage] = useState(true); // TODO: gerçek duruma göre ayarla
+  const [hasPackage, setHasPackage] = useState(true); // TODO: gerçeğe göre ayarla
   const [config, setConfig] = useState<DashboardConfig>(defaultConfig);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -48,6 +49,44 @@ const Dashboard: React.FC = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const profileRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const cartButtonRef = useRef<HTMLButtonElement | null>(null);
+  const cartDropdownRef = useRef<HTMLDivElement | null>(null);
+  const notifButtonRef = useRef<HTMLButtonElement | null>(null);
+  const notifDropdownRef = useRef<HTMLDivElement | null>(null);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<
+    { id: string; title: string; message: string; type: 'clinical' | 'admin' | 'motivation'; read: boolean }[]
+  >([
+    {
+      id: 'n1',
+      title: 'Fizyoterapistiniz programınızı güncelledi.',
+      message: 'Yeni hareket planınız hazır, detayları görmek için tıklayın.',
+      type: 'clinical',
+      read: false,
+    },
+    {
+      id: 'n2',
+      title: 'Ödemeniz başarıyla alındı.',
+      message: 'Klinik Takip Paketi hesabınıza tanımlandı, faturanızı görüntüleyebilirsiniz.',
+      type: 'admin',
+      read: false,
+    },
+    {
+      id: 'n3',
+      title: 'Egzersiz Vakti! 🏃‍♂️',
+      message: 'Bugünkü programını henüz yapmadın. 15 dakikanı ayırmayı unutma.',
+      type: 'motivation',
+      read: true,
+    },
+  ]);
+  const parsePriceToNumber = (price: string) => {
+    const normalized = price.replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.');
+    const value = parseFloat(normalized);
+    return Number.isNaN(value) ? 0 : value;
+  };
+  const formatPrice = (value: number) => `₺${value.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}`;
 
   useEffect(() => {
     const sdk = (window as unknown as { elementSdk?: any }).elementSdk;
@@ -151,6 +190,26 @@ const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (cartButtonRef.current?.contains(target) || cartDropdownRef.current?.contains(target)) return;
+      setIsCartOpen(false);
+    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (notifButtonRef.current?.contains(target) || notifDropdownRef.current?.contains(target)) return;
+      setIsNotifOpen(false);
+    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
+
+  useEffect(() => {
     const onScroll = () => {
       const doc = document.documentElement;
       const total = doc.scrollHeight - doc.clientHeight;
@@ -161,6 +220,25 @@ const Dashboard: React.FC = () => {
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const handleAddToCart = (item: CartItem) => {
+    setCartItems((prev) => [...prev, item]);
+    setIsCartOpen(true);
+  };
+
+  const handleRemoveFromCart = (index: number) => {
+    setCartItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const totalPrice = cartItems.reduce((acc, item) => acc + parsePriceToNumber(item.price), 0);
+
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
+
+  const handleNotificationClick = (id: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
 
   return (
     <div className="dashboard-wrapper" style={{ minHeight: '100vh', background: gradientBackground }}>
@@ -187,6 +265,32 @@ const Dashboard: React.FC = () => {
         .welcome-text h1 { font-size: 28px; font-weight: 700; color: ${config.text_color}; margin: 0 0 6px 0; }
         .welcome-text p { font-size: 16px; color: #4a4a4a; margin: 0; font-weight: 500; }
         .top-bar-right { display: flex; align-items: center; gap: 20px; position: relative; }
+        .cart-wrapper { position: relative; }
+        .cart-button { width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; border: none; }
+        .cart-button:hover { background: #e5e7eb; }
+        .cart-badge { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; background: #ef4444; color: #fff; border-radius: 999px; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 5px; }
+        .cart-dropdown { position: absolute; right: 0; top: 48px; width: 320px; background: #fff; border-radius: 14px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); border: 1px solid #e5e7eb; padding: 14px; z-index: 20; }
+        .cart-item { display: grid; grid-template-columns: 1fr auto auto; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item-title { font-weight: 600; color: #111827; font-size: 13px; line-height: 1.3; }
+        .cart-item-tag { font-size: 11px; color: #6b7280; }
+        .cart-checkout { margin-top: 12px; width: 100%; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #fff; border: none; padding: 10px 12px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .cart-checkout:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(79,70,229,0.3); }
+        .notif-wrapper { position: relative; }
+        .notif-button { width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; border: none; position: relative; }
+        .notif-button:hover { background: #e5e7eb; }
+        .notif-badge { position: absolute; top: 6px; right: 6px; width: 9px; height: 9px; background: #ef4444; border-radius: 50%; border: 2px solid #fff; }
+        .notif-dropdown { position: absolute; right: 0; top: 48px; width: 340px; background: #fff; border-radius: 14px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); border: 1px solid #e5e7eb; padding: 14px; z-index: 20; }
+        .notif-item { padding: 10px; border-radius: 12px; border: 1px solid #f3f4f6; background: #f8fafc; display: grid; grid-template-columns: 1fr auto; gap: 8px; cursor: pointer; transition: all 0.15s ease; }
+        .notif-item + .notif-item { margin-top: 8px; }
+        .notif-item.read { background: #fff; }
+        .notif-item:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
+        .notif-title { font-weight: 700; color: #111827; font-size: 13px; line-height: 1.3; }
+        .notif-msg { font-size: 12px; color: #4b5563; }
+        .notif-chip { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 700; }
+        .notif-clinical { background: #dbeafe; color: #1d4ed8; }
+        .notif-admin { background: #fee2e2; color: #b91c1c; }
+        .notif-motivation { background: #dcfce7; color: #15803d; }
         .notification-bell { width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; }
         .notification-bell:hover { background: #e5e7eb; }
         .profile-pic { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; position: relative; }
@@ -259,12 +363,12 @@ const Dashboard: React.FC = () => {
             <span>Ana Sayfa</span>
           </div>
           <div className="menu-item locked" onClick={() => handleLockedClick(false)}>
-            <span role="img" aria-label="exercise">🧘</span>
+            <span role="img" aria-label="exercise">🤸‍♀️</span>
             <span>Egzersiz Programım</span>
             <span>🔒</span>
           </div>
           <div className="menu-item locked" onClick={() => handleLockedClick(false)}>
-            <span role="img" aria-label="calendar">📅</span>
+            <span role="img" aria-label="calendar">🗓️</span>
             <span>Takvim / İlerleme</span>
             <span>🔒</span>
           </div>
@@ -307,7 +411,121 @@ const Dashboard: React.FC = () => {
             <p id="welcome-subtitle">{config.welcome_subtitle}</p>
           </div>
           <div className="top-bar-right">
-            <div className="notification-bell" title="Bildirimler">🔔</div>
+            <div className="cart-wrapper">
+              <button
+                className="cart-button"
+                ref={cartButtonRef}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCartOpen((prev) => !prev);
+                }}
+                aria-label="Sepet"
+              >
+                🛒
+            {cartItems.length > 0 && (
+              <span className="cart-badge">{cartItems.length}</span>
+            )}
+          </button>
+          {isCartOpen && (
+                <div className="cart-dropdown" ref={cartDropdownRef}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontWeight: 700, color: '#111827' }}>Sepetiniz</span>
+                    <span style={{ fontSize: 12, color: '#6b7280' }}>{cartItems.length} ürün</span>
+                  </div>
+                  {cartItems.length === 0 ? (
+                    <div style={{ fontSize: 13, color: '#6b7280' }}>Henüz paket eklemediniz.</div>
+                  ) : (
+                    <>
+                      <div style={{ maxHeight: 220, overflowY: 'auto' }}>
+                        {cartItems.map((item, idx) => (
+                          <div className="cart-item" key={`${item.id}-${idx}`}>
+                            <div>
+                            <div className="cart-item-title">{item.title}</div>
+                            <div className="cart-item-tag">Paket</div>
+                          </div>
+                          <div style={{ fontWeight: 700, color: '#4f46e5', whiteSpace: 'nowrap' }}>{item.price}</div>
+                          <button
+                            aria-label="Kaldır"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveFromCart(idx);
+                              setIsCartOpen(true);
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 14 }}
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                        ))}
+                      </div>
+                      <button className="cart-checkout">
+                        Ödemeye Geç · {formatPrice(totalPrice)}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="notif-wrapper">
+              <button
+                className="notif-button"
+                ref={notifButtonRef}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsNotifOpen((prev) => !prev);
+                }}
+                aria-label="Bildirimler"
+              >
+                🔔
+                {unreadNotifications > 0 && <span className="notif-badge" />}
+              </button>
+              {isNotifOpen && (
+                <div className="notif-dropdown" ref={notifDropdownRef}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <span style={{ fontWeight: 700, color: '#111827' }}>Bildirimler</span>
+                    <span style={{ fontSize: 12, color: '#6b7280' }}>
+                      {unreadNotifications} okunmamış
+                    </span>
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div style={{ fontSize: 13, color: '#6b7280' }}>Yeni bildiriminiz yok.</div>
+                  ) : (
+                    <div style={{ maxHeight: 260, overflowY: 'auto' }}>
+                      {notifications.map((notif) => (
+                        <div
+                          key={notif.id}
+                          className={`notif-item ${notif.read ? 'read' : ''}`}
+                          onClick={() => handleNotificationClick(notif.id)}
+                        >
+                          <div>
+                            <div className="notif-title">{notif.title}</div>
+                            <div className="notif-msg">{notif.message}</div>
+                          </div>
+                          <div>
+                            <span
+                              className={`notif-chip ${
+                                notif.type === 'clinical'
+                                  ? 'notif-clinical'
+                                  : notif.type === 'admin'
+                                  ? 'notif-admin'
+                                  : 'notif-motivation'
+                              }`}
+                            >
+                              {notif.type === 'clinical'
+                                ? 'Klinik'
+                                : notif.type === 'admin'
+                                ? 'İdari'
+                                : 'Motivasyon'}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <div
               className="profile-pic"
               title="Profil"
@@ -325,13 +543,13 @@ const Dashboard: React.FC = () => {
                 <div className="profile-avatar-large">{config.user_name?.charAt(0).toUpperCase()}</div>
                 <div className="profile-name">{config.user_name}</div>
                 <span className={`premium-badge-inline ${hasPackage ? '' : 'premium-badge-blur'}`}>
-                  ⭐ {hasPackage ? 'Premium Üye' : 'Premium kilitli'}
+                  ⭐ {hasPackage ? 'Premium üye' : 'Premium kilitli'}
                 </span>
               </div>
               <div className="profile-menu-section">
                 <div className="profile-section-title">Kişisel Sağlık Verileri</div>
                 <div className="profile-menu-item">
-                  <span className="profile-menu-icon">📸</span>
+                  <span className="profile-menu-icon">🖼️</span>
                   <div className="profile-menu-text">
                     <div>Vücut Fotoğraflarım</div>
                     <div className="subtitle">Postür fotoğraflarını görüntüle</div>
@@ -355,7 +573,7 @@ const Dashboard: React.FC = () => {
               <div className="profile-menu-section">
                 <div className="profile-section-title">Hesap Yönetimi</div>
                 <div className="profile-menu-item">
-                  <span className="profile-menu-icon">🔒</span>
+                  <span className="profile-menu-icon">🔑</span>
                   <div className="profile-menu-text">
                     <div>Şifre Değiştir</div>
                   </div>
@@ -392,7 +610,7 @@ const Dashboard: React.FC = () => {
               <h2 id="cta-title">{config.cta_title}</h2>
               <p id="cta-description">{config.cta_description}</p>
               <button className="cta-button" onClick={handleAnalysisStart} disabled={analysisLoading}>
-                <span>▶</span>
+                <span>🚀</span>
                 <span id="cta-button-text">
                   {analysisLoading ? 'Yönlendiriliyorsunuz...' : config.cta_button_text}
                 </span>
@@ -405,7 +623,7 @@ const Dashboard: React.FC = () => {
 
           <div className="info-cards">
             <div className="info-card video-card">
-              <div className="info-card-icon">🎬</div>
+              <div className="info-card-icon">🎥</div>
               <h3 id="video-title">{config.video_title}</h3>
               <p>1 dakikalık "Sistem Nasıl İşliyor?" videosunu izleyerek süreci daha iyi anlayabilirsiniz.</p>
             </div>
@@ -446,7 +664,11 @@ const Dashboard: React.FC = () => {
           setShowSummary(true);
         }}
       />
-      <AnalysisSummary open={showSummary} onClose={() => setShowSummary(false)} />
+      <AnalysisSummary
+        open={showSummary}
+        onClose={() => setShowSummary(false)}
+        onAddToCart={(item) => handleAddToCart(item)}
+      />
     </div>
   );
 };
