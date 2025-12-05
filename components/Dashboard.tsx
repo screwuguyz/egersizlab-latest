@@ -1,6 +1,20 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import AssessmentWizard from './AssessmentWizard';
 import AnalysisSummary from './AnalysisSummary';
+import SupportTicketModal from './SupportTicketModal';
+import HelpFAQModal from './HelpFAQModal';
+import PackagesModal from './PackagesModal';
+import SettingsModal from './SettingsModal';
+import VideoModal from './VideoModal';
+import ExerciseProgramModal from './ExerciseProgramModal';
+import ProgressModal from './ProgressModal';
+import AnimatedLogo from './AnimatedLogo';
+
+interface CartItem {
+  id: string;
+  name: string;
+  price: string;
+}
 
 type DashboardConfig = {
   user_name: string;
@@ -44,6 +58,46 @@ const Dashboard: React.FC = () => {
   const [showWizard, setShowWizard] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
+  const [showFAQ, setShowFAQ] = useState(false);
+  const [showPackages, setShowPackages] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  const [hasPackage, setHasPackage] = useState(false);
+  const [showExerciseProgram, setShowExerciseProgram] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [showCart, setShowCart] = useState(false);
+
+  const addToCart = (item: { id: string; name: string; price?: string }) => {
+    if (!cart.find(c => c.id === item.id)) {
+      setCart([...cart, { id: item.id, name: item.name, price: item.price || '0' }]);
+      // Close all modals and open cart
+      setShowSummary(false);
+      setShowPackages(false);
+      setTimeout(() => setShowCart(true), 300);
+    }
+  };
+
+  const removeFromCart = (id: string) => {
+    setCart(cart.filter(item => item.id !== id));
+  };
+
+  const getCartTotal = () => {
+    return cart.reduce((sum, item) => sum + parseInt(item.price.replace(/\./g, '')), 0);
+  };
+
+  const healthTips = [
+    { icon: '💡', title: 'Biliyor muydunuz?', text: "Kronik ağrıların %80'i doğru duruş ve egzersizle ameliyatsız iyileşebilir." },
+    { icon: '🧘', title: 'Günlük İpucu', text: 'Her gün 10 dakika germe egzersizi, kas gerginliğini %40 azaltır.' },
+    { icon: '🚶', title: 'Hareket Şart!', text: 'Her 45 dakikada bir 5 dakika yürümek, bel ağrısı riskini %50 düşürür.' },
+    { icon: '💧', title: 'Su İçin', text: 'Günde 2 litre su içmek, eklem sağlığını korur ve kas kramplarını önler.' },
+    { icon: '😴', title: 'Uyku Önemli', text: 'Kaliteli 7-8 saat uyku, kas onarımı ve ağrı yönetimi için kritiktir.' },
+    { icon: '🏋️', title: 'Düzenli Egzersiz', text: 'Haftada 3 gün egzersiz, kronik ağrıyı %60 oranında azaltabilir.' },
+    { icon: '🪑', title: 'Doğru Oturuş', text: 'Ergonomik oturma pozisyonu, boyun ve sırt ağrılarını önler.' },
+    { icon: '🌿', title: 'Stres Yönetimi', text: 'Stres kas gerginliğini artırır. Nefes egzersizleri rahatlamanıza yardımcı olur.' },
+  ];
   const [scrollProgress, setScrollProgress] = useState(0);
   const profileRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -161,6 +215,14 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Rotating health tips
+  useEffect(() => {
+    const tipInterval = setInterval(() => {
+      setCurrentTipIndex((prev) => (prev + 1) % healthTips.length);
+    }, 8000); // 8 saniyede bir değişir
+    return () => clearInterval(tipInterval);
+  }, [healthTips.length]);
+
   return (
     <div className="dashboard-wrapper" style={{ minHeight: '100vh', background: gradientBackground }}>
       <style>{`
@@ -188,6 +250,31 @@ const Dashboard: React.FC = () => {
         .top-bar-right { display: flex; align-items: center; gap: 20px; position: relative; }
         .notification-bell { width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; }
         .notification-bell:hover { background: #e5e7eb; }
+        
+        /* Cart Styles */
+        .cart-wrapper { position: relative; }
+        .cart-bell { width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; position: relative; }
+        .cart-bell:hover { background: #d1fae5; }
+        .cart-badge { position: absolute; top: -4px; right: -4px; width: 20px; height: 20px; background: #ef4444; color: #fff; font-size: 11px; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: bounce 0.5s ease; }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        .cart-overlay { position: fixed; inset: 0; z-index: 999; }
+        .cart-dropdown { position: absolute; top: 50px; right: 0; width: 320px; background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; overflow: hidden; z-index: 1000; animation: slideDown 0.2s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .cart-header { background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding: 14px 16px; font-size: 15px; font-weight: 700; }
+        .cart-empty { padding: 30px; text-align: center; color: #9ca3af; font-size: 14px; }
+        .cart-items { max-height: 240px; overflow-y: auto; }
+        .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
+        .cart-item-info { display: flex; flex-direction: column; gap: 2px; }
+        .cart-item-name { font-size: 13px; font-weight: 600; color: #1f2937; }
+        .cart-item-price { font-size: 14px; font-weight: 700; color: #10b981; }
+        .cart-item-remove { background: none; border: none; color: #ef4444; font-size: 16px; cursor: pointer; padding: 4px; border-radius: 4px; }
+        .cart-item-remove:hover { background: #fef2f2; }
+        .cart-footer { padding: 14px 16px; background: #f9fafb; border-top: 1px solid #e5e7eb; }
+        .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .cart-total span:first-child { font-size: 14px; color: #6b7280; font-weight: 500; }
+        .cart-total-price { font-size: 20px; font-weight: 800; color: #10b981; }
+        .cart-checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .cart-checkout-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
         .profile-pic { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; position: relative; }
         .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; }
         .main-cta-card { background: ${config.card_background}; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 32px; display: flex; gap: 32px; align-items: center; }
@@ -205,6 +292,35 @@ const Dashboard: React.FC = () => {
         .tip-card .info-card-icon { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
         .info-card h3 { font-size: 18px; font-weight: 600; color: #1f2937; margin: 0 0 8px 0; }
         .info-card p { font-size: 14px; color: #6b7280; line-height: 1.6; margin: 0; }
+        .tip-carousel { position: relative; overflow: hidden; }
+        .tip-carousel .info-card-icon { transition: transform 0.5s ease; }
+        .tip-title-animated, .tip-text-animated { 
+          animation: tipFadeIn 0.5s ease; 
+        }
+        @keyframes tipFadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .tip-dots {
+          display: flex;
+          justify-content: center;
+          gap: 6px;
+          margin-top: 12px;
+        }
+        .tip-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #d1d5db;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+        .tip-dot:hover { background: #9ca3af; }
+        .tip-dot.active { 
+          background: #10b981; 
+          width: 24px; 
+          border-radius: 4px; 
+        }
         .profile-dropdown { position: absolute; top: 70px; right: 32px; width: 320px; background: #fff; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.25s ease; z-index: 1000; border: 1px solid #e5e7eb; }
         .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
         .profile-card-header { padding: 20px; border-bottom: 1px solid #e5e7eb; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px 16px 0 0; color: #fff; }
@@ -232,12 +348,8 @@ const Dashboard: React.FC = () => {
       <div className="sidebar">
         <div className="sidebar-header">
           <div className="logo">
-            <img
-              src="/logo.png"
-              alt="EgzersizLab Logo"
-              style={{ width: 72, height: 72, objectFit: 'contain' }}
-            />
-            <span style={{ fontSize: 22, fontWeight: 'bold', color: '#1e40af' }}>EgzersizLab</span>
+            <AnimatedLogo size={56} />
+            <span style={{ fontSize: 20, fontWeight: 'bold', background: 'linear-gradient(135deg, #667eea, #10b981)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>EgzersizLab</span>
           </div>
           <div className="logo-progress">
             <div className="logo-progress-inner" style={{ width: `${scrollProgress}%` }} />
@@ -249,16 +361,32 @@ const Dashboard: React.FC = () => {
             <span role="img" aria-label="home">🏠</span>
             <span>Ana Sayfa</span>
           </div>
-          <div className="menu-item locked" onClick={() => handleLockedClick(false)}>
-            <span role="img" aria-label="exercise">🧘</span>
-            <span>Egzersiz Programım</span>
-            <span>🔒</span>
-          </div>
-          <div className="menu-item locked" onClick={() => handleLockedClick(false)}>
-            <span role="img" aria-label="calendar">📅</span>
-            <span>Takvim / İlerleme</span>
-            <span>🔒</span>
-          </div>
+          {hasPackage ? (
+            <div className="menu-item" onClick={() => setShowExerciseProgram(true)}>
+              <span role="img" aria-label="exercise">🧘</span>
+              <span>Egzersiz Programım</span>
+              <span>✅</span>
+            </div>
+          ) : (
+            <div className="menu-item locked" onClick={() => handleLockedClick(false)}>
+              <span role="img" aria-label="exercise">🧘</span>
+              <span>Egzersiz Programım</span>
+              <span>🔒</span>
+            </div>
+          )}
+          {hasPackage ? (
+            <div className="menu-item" onClick={() => setShowProgress(true)}>
+              <span role="img" aria-label="calendar">📅</span>
+              <span>Takvim / İlerleme</span>
+              <span>✅</span>
+            </div>
+          ) : (
+            <div className="menu-item locked" onClick={() => handleLockedClick(false)}>
+              <span role="img" aria-label="calendar">📅</span>
+              <span>Takvim / İlerleme</span>
+              <span>🔒</span>
+            </div>
+          )}
           <div className="menu-divider" />
           <div className="menu-section-title">DESTEK & İLETİŞİM</div>
           <div className="menu-item locked premium-feature" onClick={() => handleLockedClick(true)}>
@@ -266,21 +394,21 @@ const Dashboard: React.FC = () => {
             <span>Fizyoterapiste Sor</span>
             <span>🔒</span>
           </div>
-          <div className="menu-item">
+          <div className="menu-item" onClick={() => setShowSupport(true)}>
             <span role="img" aria-label="ticket">🎟️</span>
             <span>Destek Talebi</span>
           </div>
-          <div className="menu-item">
+          <div className="menu-item" onClick={() => setShowFAQ(true)}>
             <span role="img" aria-label="help">❓</span>
             <span>Yardım / SSS</span>
           </div>
           <div className="menu-divider" />
           <div className="menu-section-title">HESAP & AYARLAR</div>
-          <div className="menu-item">
+          <div className="menu-item" onClick={() => setShowPackages(true)}>
             <span role="img" aria-label="package">📦</span>
             <span>Paketlerim & Ödemeler</span>
           </div>
-          <div className="menu-item">
+          <div className="menu-item" onClick={() => setShowSettings(true)}>
             <span role="img" aria-label="settings">⚙️</span>
             <span>Ayarlar</span>
           </div>
@@ -299,6 +427,64 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="top-bar-right">
             <div className="notification-bell" title="Bildirimler">🔔</div>
+            
+            {/* Cart Button */}
+            <div className="cart-wrapper">
+              <div 
+                className="cart-bell" 
+                title="Sepetim"
+                onClick={() => setShowCart(!showCart)}
+              >
+                🛒
+                {cart.length > 0 && (
+                  <span className="cart-badge">{cart.length}</span>
+                )}
+              </div>
+              
+              {/* Cart Dropdown with Overlay */}
+              {showCart && (
+                <>
+                <div className="cart-overlay" onClick={() => setShowCart(false)} />
+                <div className="cart-dropdown">
+                  <div className="cart-header">
+                    🛒 Sepetim ({cart.length})
+                  </div>
+                  {cart.length === 0 ? (
+                    <div className="cart-empty">Sepetiniz boş</div>
+                  ) : (
+                    <>
+                      <div className="cart-items">
+                        {cart.map(item => (
+                          <div key={item.id} className="cart-item">
+                            <div className="cart-item-info">
+                              <span className="cart-item-name">{item.name}</span>
+                              <span className="cart-item-price">{item.price}₺</span>
+                            </div>
+                            <button 
+                              className="cart-item-remove"
+                              onClick={() => removeFromCart(item.id)}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="cart-footer">
+                        <div className="cart-total">
+                          <span>Toplam:</span>
+                          <span className="cart-total-price">{getCartTotal().toLocaleString()}₺</span>
+                        </div>
+                        <button className="cart-checkout-btn">
+                          💳 Ödemeye Geç
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+                </>
+              )}
+            </div>
+            
             <div
               className="profile-pic"
               title="Profil"
@@ -393,15 +579,24 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="info-cards">
-            <div className="info-card video-card">
+            <div className="info-card video-card" onClick={() => setShowVideo(true)}>
               <div className="info-card-icon">🎬</div>
               <h3 id="video-title">{config.video_title}</h3>
               <p>1 dakikalık "Sistem Nasıl İşliyor?" videosunu izleyerek süreci daha iyi anlayabilirsiniz.</p>
             </div>
-            <div className="info-card tip-card">
-              <div className="info-card-icon">💡</div>
-              <h3 id="tip-title">{config.tip_title}</h3>
-              <p id="tip-text">{config.tip_text}</p>
+            <div className="info-card tip-card tip-carousel">
+              <div className="info-card-icon">{healthTips[currentTipIndex].icon}</div>
+              <h3 className="tip-title-animated">{healthTips[currentTipIndex].title}</h3>
+              <p className="tip-text-animated">{healthTips[currentTipIndex].text}</p>
+              <div className="tip-dots">
+                {healthTips.map((_, idx) => (
+                  <span 
+                    key={idx} 
+                    className={`tip-dot ${idx === currentTipIndex ? 'active' : ''}`}
+                    onClick={() => setCurrentTipIndex(idx)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -435,7 +630,14 @@ const Dashboard: React.FC = () => {
           setShowSummary(true);
         }}
       />
-      <AnalysisSummary open={showSummary} onClose={() => setShowSummary(false)} />
+      <AnalysisSummary open={showSummary} onClose={() => setShowSummary(false)} onAddToCart={addToCart} cartItems={cart} />
+      <SupportTicketModal open={showSupport} onClose={() => setShowSupport(false)} />
+      <HelpFAQModal open={showFAQ} onClose={() => setShowFAQ(false)} onOpenSupport={() => setShowSupport(true)} />
+      <PackagesModal open={showPackages} onClose={() => setShowPackages(false)} onPurchase={() => { setHasPackage(true); setShowPackages(false); }} onCancelPackage={() => setHasPackage(false)} hasPackage={hasPackage} onAddToCart={addToCart} cartItems={cart} />
+      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
+      <VideoModal open={showVideo} onClose={() => setShowVideo(false)} />
+      <ExerciseProgramModal open={showExerciseProgram} onClose={() => setShowExerciseProgram(false)} />
+      <ProgressModal open={showProgress} onClose={() => setShowProgress(false)} />
     </div>
   );
 };

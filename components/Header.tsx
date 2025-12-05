@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Menu, Search, ShoppingCart, X, User } from 'lucide-react';
 import RegistrationModal from './RegistrationModal';
 import LoginModal from './LoginModal';
+import AnimatedLogo from './AnimatedLogo';
 
 const navItems = [
   { href: '#hero', label: 'Ana Sayfa' },
@@ -107,14 +108,16 @@ const Header: React.FC = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <img
-                src="/logo.png"
-                alt="EgzersizLab Logo"
-                className="w-auto object-contain"
-                style={{ height: '6.25rem' }} // h-25 approx
-              />
-              <span className="text-4xl font-bold text-[#263562]">EgzersizLab</span>
+            <div className="flex items-center gap-3">
+              <AnimatedLogo size={70} />
+              <div className="flex flex-col">
+                <span className="text-3xl font-bold bg-gradient-to-r from-[#667eea] to-[#10b981] bg-clip-text text-transparent">
+                  EgzersizLab
+                </span>
+                <span className="text-xs text-gray-500 font-medium tracking-wider">
+                  DİJİTAL REHABİLİTASYON
+                </span>
+              </div>
             </div>
 
             {/* Desktop Nav */}
