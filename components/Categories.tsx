@@ -1,6 +1,10 @@
 import React from 'react';
 import { Check, X } from 'lucide-react';
 
+interface CategoriesProps {
+  onSelectPackage?: () => void;
+}
+
 const packages = [
   {
     id: 'basic',
@@ -44,7 +48,7 @@ const packages = [
   },
 ];
 
-const Categories = () => {
+const Categories: React.FC<CategoriesProps> = ({ onSelectPackage }) => {
   return (
     <section
       id="packages"
@@ -103,6 +107,18 @@ const Categories = () => {
                   </li>
                 )}
               </ul>
+
+              {/* Seç Butonu */}
+              <button
+                onClick={onSelectPackage}
+                className={`mt-6 w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg ${
+                  pkg.recommended
+                    ? 'bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                }`}
+              >
+                {pkg.recommended ? '✨ Bu Paketi Seç' : 'Paketi Seç'}
+              </button>
             </div>
           ))}
         </div>

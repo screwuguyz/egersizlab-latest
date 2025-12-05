@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Menu, Search, ShoppingCart, X, User } from 'lucide-react';
-import RegistrationModal from './RegistrationModal';
+import { Menu, Search, X, User } from 'lucide-react';
 import LoginModal from './LoginModal';
 import AnimatedLogo from './AnimatedLogo';
+
+interface HeaderProps {
+  onOpenRegister?: () => void;
+}
 
 const navItems = [
   { href: '#hero', label: 'Ana Sayfa' },
@@ -13,11 +16,16 @@ const navItems = [
   { href: '#contact', label: 'İletişim' },
 ];
 
-const Header: React.FC = () => {
+const Header: React.FC<HeaderProps> = ({ onOpenRegister }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeLink, setActiveLink] = useState<string>('#hero');
-  const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+
+  const handleOpenRegister = () => {
+    if (onOpenRegister) {
+      onOpenRegister();
+    }
+  };
 
   useEffect(() => {
     const setFromHash = () => {
@@ -94,7 +102,7 @@ const Header: React.FC = () => {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  setShowRegister(true);
+                  handleOpenRegister();
                 }}
                 className="relative px-6 py-2 text-sm font-semibold rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg transition"
               >
@@ -144,12 +152,6 @@ const Header: React.FC = () => {
                 />
                 <Search className="absolute right-3 top-2.5 text-gray-400" size={18} />
               </div>
-              <button className="relative p-2 hover:bg-gray-100 rounded-full transition">
-                <ShoppingCart size={22} className="text-gray-700" />
-                <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
-                  0
-                </span>
-              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -185,7 +187,7 @@ const Header: React.FC = () => {
                 </button>
                 <button
                   className="bg-[#263562] text-white py-2 rounded-lg font-medium w-full"
-                  onClick={() => setShowRegister(true)}
+                  onClick={handleOpenRegister}
                 >
                   Kayıt Ol
                 </button>
@@ -194,7 +196,6 @@ const Header: React.FC = () => {
           </div>
         )}
       </header>
-      {showRegister && <RegistrationModal onClose={() => setShowRegister(false)} />}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </>
   );

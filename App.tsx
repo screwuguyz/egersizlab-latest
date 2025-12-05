@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import CourseCard from './components/CourseCard';
 import GeminiAssistant from './components/GeminiAssistant';
@@ -8,6 +8,7 @@ import FeaturesBar from './components/FeaturesBar';
 import KnowledgeHub from './components/KnowledgeHub';
 import Categories from './components/Categories';
 import WebinarPromo from './components/WebinarPromo';
+import RegistrationModal from './components/RegistrationModal';
 import { Course } from './types';
 
 // Mock Data
@@ -63,13 +64,15 @@ const courses: Course[] = [
 ];
 
 function App() {
+  const [showRegister, setShowRegister] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Header />
+      <Header onOpenRegister={() => setShowRegister(true)} />
       <Hero />
       <KnowledgeHub />
       <FeaturesBar />
-      <Categories />
+      <Categories onSelectPackage={() => setShowRegister(true)} />
 
       {/* Popular Courses */}
       <PopularCourses courses={courses} />
@@ -225,6 +228,9 @@ function App() {
 
       {/* AI Assistant */}
       <GeminiAssistant />
+
+      {/* Registration Modal */}
+      {showRegister && <RegistrationModal onClose={() => setShowRegister(false)} />}
     </div>
   );
 }
