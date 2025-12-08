@@ -1,6 +1,9 @@
 import React from 'react';
-import { Check } from 'lucide-react';
-import { CartItem } from '@/types';
+import { Check, X } from 'lucide-react';
+
+interface CategoriesProps {
+  onSelectPackage?: () => void;
+}
 
 const packages = [
   {
@@ -50,11 +53,7 @@ const packages = [
   },
 ];
 
-interface CategoriesProps {
-  onAddToCart: (item: CartItem) => void;
-}
-
-const Categories: React.FC<CategoriesProps> = ({ onAddToCart }) => {
+const Categories: React.FC<CategoriesProps> = ({ onSelectPackage }) => {
   return (
     <section
       id="packages"
@@ -115,11 +114,17 @@ const Categories: React.FC<CategoriesProps> = ({ onAddToCart }) => {
                   </li>
                 ))}
               </ul>
+
+              {/* Seç Butonu */}
               <button
-                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow-md transition"
-                onClick={() => onAddToCart({ id: pkg.id, title: pkg.title, price: pkg.price })}
+                onClick={onSelectPackage}
+                className={`mt-6 w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg ${
+                  pkg.recommended
+                    ? 'bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                }`}
               >
-                Sepete Ekle
+                {pkg.recommended ? '✨ Bu Paketi Seç' : 'Paketi Seç'}
               </button>
             </div>
           ))}

@@ -1,8 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Bell, Menu, Search, X, User } from 'lucide-react';
-import RegistrationModal from './RegistrationModal';
+import React, { useEffect, useState } from 'react';
+import { Menu, Search, X, User } from 'lucide-react';
 import LoginModal from './LoginModal';
-import { CartItem } from '@/types';
+import AnimatedLogo from './AnimatedLogo';
+
+interface HeaderProps {
+  onOpenRegister?: () => void;
+}
 
 const navItems = [
   { href: '#hero', label: 'Ana Sayfa' },
@@ -13,19 +16,16 @@ const navItems = [
   { href: '#contact', label: 'İletişim' },
 ];
 
-interface HeaderProps {
-  cartItems: CartItem[];
-}
-
-const Header: React.FC<HeaderProps> = ({ cartItems }) => {
+const Header: React.FC<HeaderProps> = ({ onOpenRegister }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeLink, setActiveLink] = useState<string>('#hero');
-  const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const cartButtonRef = useRef<HTMLButtonElement | null>(null);
-  const cartPopoverRef = useRef<HTMLDivElement | null>(null);
-  const cartCount = cartItems.length;
+
+  const handleOpenRegister = () => {
+    if (onOpenRegister) {
+      onOpenRegister();
+    }
+  };
 
   useEffect(() => {
     const setFromHash = () => {
@@ -61,28 +61,6 @@ const Header: React.FC<HeaderProps> = ({ cartItems }) => {
 
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        !isCartOpen ||
-        !cartButtonRef.current ||
-        !cartPopoverRef.current
-      ) {
-        return;
-      }
-
-      if (
-        !cartButtonRef.current.contains(event.target as Node) &&
-        !cartPopoverRef.current.contains(event.target as Node)
-      ) {
-        setIsCartOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isCartOpen]);
 
   const handleNavClick = (href: string) => {
     setActiveLink(href);
@@ -124,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({ cartItems }) => {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  setShowRegister(true);
+                  handleOpenRegister();
                 }}
                 className="relative px-6 py-2 text-sm font-semibold rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg transition"
               >
@@ -138,14 +116,16 @@ const Header: React.FC<HeaderProps> = ({ cartItems }) => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <img
-                src="/logo.png"
-                alt="EgzersizLab Logo"
-                className="w-auto object-contain"
-                style={{ height: '6.25rem' }} // h-25 approx
-              />
-              <span className="text-4xl font-bold text-[#263562]">EgzersizLab</span>
+            <div className="flex items-center gap-3">
+              <AnimatedLogo size={70} />
+              <div className="flex flex-col">
+                <span className="text-3xl font-bold bg-gradient-to-r from-[#667eea] to-[#10b981] bg-clip-text text-transparent">
+                  EgzersizLab
+                </span>
+                <span className="text-xs text-gray-500 font-medium tracking-wider">
+                  DİJİTAL REHABİLİTASYON
+                </span>
+              </div>
             </div>
 
             {/* Desktop Nav */}
@@ -172,60 +152,6 @@ const Header: React.FC<HeaderProps> = ({ cartItems }) => {
                 />
                 <Search className="absolute right-3 top-2.5 text-gray-400" size={18} />
               </div>
-
-              <div className="relative">
-                <button
-                  ref={cartButtonRef}
-                  onClick={() => setIsCartOpen((prev) => !prev)}
-                  className="relative p-2 hover:bg-gray-100 rounded-full transition flex items-center justify-center"
-                  aria-label="Sepet"
-                  aria-expanded={isCartOpen}
-                >
-                  <span className="text-2xl leading-none">🛒</span>
-                  {cartCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full font-semibold">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
-
-                {isCartOpen && (
-                  <div
-                    ref={cartPopoverRef}
-                    className="absolute right-0 mt-3 w-72 bg-white border border-gray-200 shadow-xl rounded-2xl p-4"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-semibold text-gray-900">Sepetiniz</span>
-                      <span className="text-xs text-gray-500">{cartCount} ürün</span>
-                    </div>
-                    {cartCount === 0 ? (
-                      <p className="text-sm text-gray-500">Henüz paket eklemediniz.</p>
-                    ) : (
-                      <div className="space-y-3 max-h-64 overflow-y-auto">
-                        {cartItems.map((item, index) => (
-                          <div
-                            key={`${item.id}-${index}`}
-                            className="flex items-start justify-between gap-2 border-b border-gray-100 pb-2 last:border-none last:pb-0"
-                          >
-                            <div>
-                              <p className="font-semibold text-gray-800 text-sm leading-tight">{item.title}</p>
-                              <p className="text-xs text-gray-500">Paket</p>
-                            </div>
-                            <span className="text-sm font-bold text-indigo-600">{item.price}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <button className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg shadow-md transition">
-                      Ödemeye Geç
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <button className="relative p-2 hover:bg-gray-100 rounded-full transition" aria-label="Bildirimler">
-                <Bell size={22} className="text-gray-700" />
-              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -261,7 +187,7 @@ const Header: React.FC<HeaderProps> = ({ cartItems }) => {
                 </button>
                 <button
                   className="bg-[#263562] text-white py-2 rounded-lg font-medium w-full"
-                  onClick={() => setShowRegister(true)}
+                  onClick={handleOpenRegister}
                 >
                   Kayıt Ol
                 </button>
@@ -270,7 +196,6 @@ const Header: React.FC<HeaderProps> = ({ cartItems }) => {
           </div>
         )}
       </header>
-      {showRegister && <RegistrationModal onClose={() => setShowRegister(false)} />}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </>
   );

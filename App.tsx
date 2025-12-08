@@ -8,7 +8,8 @@ import FeaturesBar from './components/FeaturesBar';
 import KnowledgeHub from './components/KnowledgeHub';
 import Categories from './components/Categories';
 import WebinarPromo from './components/WebinarPromo';
-import { CartItem, Course } from './types';
+import RegistrationModal from './components/RegistrationModal';
+import { Course } from './types';
 
 // Mock Data
 const courses: Course[] = [
@@ -63,19 +64,15 @@ const courses: Course[] = [
 ];
 
 function App() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
-  const handleAddToCart = (item: CartItem) => {
-    setCartItems((prev) => [...prev, item]);
-  };
+  const [showRegister, setShowRegister] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Header cartItems={cartItems} />
+      <Header onOpenRegister={() => setShowRegister(true)} />
       <Hero />
       <KnowledgeHub />
       <FeaturesBar />
-      <Categories onAddToCart={handleAddToCart} />
+      <Categories onSelectPackage={() => setShowRegister(true)} />
 
       {/* Popular Courses */}
       <PopularCourses courses={courses} />
@@ -231,6 +228,9 @@ function App() {
 
       {/* AI Assistant */}
       <GeminiAssistant />
+
+      {/* Registration Modal */}
+      {showRegister && <RegistrationModal onClose={() => setShowRegister(false)} />}
     </div>
   );
 }
