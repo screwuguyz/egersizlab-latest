@@ -333,8 +333,8 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
                 <span className="text-white text-lg">🏥</span>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">Vücut Analizi</h2>
-                <p className="text-gray-500 text-xs">Kişiselleştirilmiş program için bilgi topluyoruz</p>
+                <h2 className="text-xl font-bold text-gray-900">Vücut Analizi</h2>
+                <p className="text-gray-500 text-sm">Kişiselleştirilmiş program için bilgi topluyoruz</p>
               </div>
             </div>
             <button
@@ -351,7 +351,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
                 <div className={`h-1.5 flex-1 rounded-full transition-all ${s <= step ? 'bg-emerald-500' : 'bg-gray-200'}`} />
               </div>
             ))}
-            <span className="text-xs font-semibold text-gray-500 ml-2">{step}/5</span>
+            <span className="text-sm font-semibold text-gray-500 ml-2">{step}/5</span>
           </div>
         </div>
 
@@ -664,11 +664,11 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 10px 16px;
+          padding: 12px 18px;
           border-radius: 10px;
           border: 2px solid #e2e8f0;
           background: #fff;
-          font-size: 13px;
+          font-size: 16px;
           font-weight: 600;
           color: #475569;
           cursor: pointer;
@@ -690,16 +690,16 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 4px;
         }
         .meas-label {
-          font-size: 10px;
+          font-size: 13px;
           font-weight: 700;
           color: #64748b;
           text-transform: uppercase;
         }
         .meas-item input {
-          padding: 10px;
+          padding: 12px;
           border: 2px solid #e2e8f0;
           border-radius: 8px;
-          font-size: 15px;
+          font-size: 18px;
           font-weight: 600;
           color: #1e293b;
           background: #f8fafc;
@@ -711,7 +711,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           background: #fff;
         }
         .meas-unit {
-          font-size: 10px;
+          font-size: 12px;
           color: #94a3b8;
           margin-top: 2px;
         }
@@ -729,12 +729,12 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 4px;
-          padding: 10px 8px;
+          gap: 6px;
+          padding: 12px 10px;
           border-radius: 10px;
           border: 2px solid #e2e8f0;
           background: #fff;
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 600;
           color: #475569;
           cursor: pointer;
@@ -758,24 +758,24 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 4px;
         }
         .opt-field label {
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 500;
           color: #475569;
         }
         .opt-tag {
-          font-size: 9px;
+          font-size: 11px;
           font-weight: 600;
           color: #94a3b8;
           background: #f1f5f9;
-          padding: 2px 5px;
+          padding: 3px 6px;
           border-radius: 4px;
           margin-left: 4px;
         }
         .opt-field textarea {
           border: 2px solid #e2e8f0;
           border-radius: 8px;
-          padding: 8px 10px;
-          font-size: 12px;
+          padding: 10px 12px;
+          font-size: 15px;
           color: #334155;
           background: #f8fafc;
           resize: none;
@@ -1061,15 +1061,15 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           margin-bottom: 0;
         }
         .section-header-compact h3 {
-          font-size: 16px;
+          font-size: 22px;
           font-weight: 700;
           color: #1e293b;
           margin: 0;
         }
         .section-header-compact p {
-          font-size: 12px;
+          font-size: 16px;
           color: #64748b;
-          margin: 2px 0 0 0;
+          margin: 4px 0 0 0;
         }
         .body-diagrams-compact {
           display: grid;
@@ -1449,7 +1449,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 16px;
         }
         .field-label-sm {
-          font-size: 11px;
+          font-size: 15px;
           font-weight: 700;
           color: #64748b;
           text-transform: uppercase;

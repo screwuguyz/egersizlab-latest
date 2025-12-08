@@ -63,6 +63,27 @@ const Hero = () => {
             <p className="text-lg text-gray-600 leading-relaxed max-w-lg">
               Egzersiz ve rehabilitasyonun birleştiği modern sağlık platformu. Sağlığın için dilediğin yerde, dilediğin zamanda harekete geç.
             </p>
+            
+            {/* CTA Butonları */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+              <a
+                href="#packages"
+                className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 via-blue-500 to-teal-500 text-white font-bold text-lg rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <span>🚀 Hemen Başla</span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-blue-600 to-teal-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </a>
+              <a
+                href="#process"
+                className="px-8 py-4 bg-white text-blue-600 font-semibold text-lg rounded-xl border-2 border-blue-600 hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 shadow-md"
+              >
+                Nasıl Çalışır?
+              </a>
+            </div>
+
             <div className="mt-6 w-full max-w-lg bg-gradient-to-br from-[#0f1c3a] via-[#0f1c3a] to-[#152c58] text-white rounded-2xl shadow-xl border border-white/10 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-extrabold">

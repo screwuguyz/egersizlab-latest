@@ -115,17 +115,27 @@ const Categories: React.FC<CategoriesProps> = ({ onSelectPackage }) => {
                 ))}
               </ul>
 
-              {/* Seç Butonu */}
-              <button
-                onClick={onSelectPackage}
-                className={`mt-6 w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg ${
-                  pkg.recommended
-                    ? 'bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                }`}
-              >
-                {pkg.recommended ? '✨ Bu Paketi Seç' : 'Paketi Seç'}
-              </button>
+              {/* Butonlar */}
+              <div className="mt-6 flex flex-col gap-2">
+                <button
+                  onClick={onSelectPackage}
+                  className={`w-full py-3 px-6 rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg ${
+                    pkg.recommended
+                      ? 'bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                  }`}
+                >
+                  {pkg.recommended ? '✨ Bu Paketi Seç' : 'Paketi Seç'}
+                </button>
+                {pkg.id === 'basic' && (
+                  <button
+                    onClick={onSelectPackage}
+                    className="w-full py-2.5 px-6 rounded-xl font-medium text-sm text-blue-600 hover:text-blue-700 border-2 border-blue-300 hover:border-blue-400 bg-blue-50 hover:bg-blue-100 transition-all duration-300"
+                  >
+                    🎁 Ücretsiz Dene
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

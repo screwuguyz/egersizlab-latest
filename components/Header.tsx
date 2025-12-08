@@ -12,6 +12,7 @@ const navItems = [
   { href: '#process', label: 'Sistem Nasıl İşliyor?' },
   { href: '#packages', label: 'Hizmet Paketleri' },
   { href: '#blog', label: 'Blog' },
+  { href: '#testimonials', label: 'Müşteri Yorumları' },
   { href: '#about', label: 'Hakkımızda' },
   { href: '#contact', label: 'İletişim' },
 ];
