@@ -5,13 +5,15 @@ import VerificationModal from './VerificationModal';
 interface RegistrationModalProps {
   onClose: () => void;
   onSuccess?: () => void;
+  onOpenLogin?: () => void;
 }
 
-const RegistrationModal: React.FC<RegistrationModalProps> = ({ onClose, onSuccess }) => {
+const RegistrationModal: React.FC<RegistrationModalProps> = ({ onClose, onSuccess, onOpenLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showVerification, setShowVerification] = useState(false);
+  const [showKvkk, setShowKvkk] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -231,8 +233,13 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ onClose, onSucces
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input type="checkbox" required className="checkbox-custom mt-1" />
                   <span className="text-sm text-gray-600 leading-relaxed">
-                    <a href="#" className="text-purple-600 hover:underline font-semibold">KVKK</a> ve{' '}
-                    <a href="#" className="text-purple-600 hover:underline font-semibold">Aydınlatma Metni</a>
+                  <button type="button" onClick={() => setShowKvkk(true)} className="text-purple-600 hover:underline font-semibold">
+                    KVKK
+                  </button>{' '}
+                  ve{' '}
+                  <button type="button" onClick={() => setShowKvkk(true)} className="text-purple-600 hover:underline font-semibold">
+                    Aydınlatma Metni
+                  </button>
                     'ni okudum, kabul ediyorum.
                   </span>
                 </label>
@@ -247,9 +254,16 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ onClose, onSucces
             </form>
             <div className="mt-5 text-center text-sm text-gray-600">
               Zaten hesabınız var mı?{' '}
-              <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenLogin?.();
+                }}
+                className="text-purple-600 hover:text-purple-700 font-semibold"
+              >
                 Giriş Yapın
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -275,6 +289,60 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ onClose, onSucces
             }
           }}
         />
+      )}
+
+      {showKvkk && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="bg-white max-w-3xl w-full rounded-2xl shadow-2xl overflow-hidden">
+            <div className="p-6 sm:p-8 max-h-[80vh] overflow-y-auto space-y-4 text-sm text-gray-700">
+              <div className="flex justify-between items-start">
+                <h3 className="text-xl font-bold text-gray-900">KVKK ve Aydınlatma Metni</h3>
+                <button
+                  onClick={() => setShowKvkk(false)}
+                  className="text-gray-500 hover:text-gray-700 text-lg"
+                  aria-label="Kapat"
+                >
+                  ×
+                </button>
+              </div>
+              <p>
+                EgzersizLab olarak 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) kapsamında; kimlik,
+                iletişim, işlem güvenliği ve kullanım verilerinizi hizmet sunumu, üyelik işlemleri, destek ve güvenlik
+                süreçleri için işliyoruz. Verileriniz, açık rızanıza dayalı olarak veya KVKK m.5/2 uyarınca sözleşmenin
+                ifası, hukuki yükümlülüklerin yerine getirilmesi, meşru menfaat ve hakların tesisi amaçlarıyla
+                kullanılabilir.
+              </p>
+              <p>
+                Kişisel verileriniz; yetkili kamu kurumları, iş ortakları, altyapı/hosting/e-posta sağlayıcıları ve
+                hukuken yetkili üçüncü kişilerle, hizmetlerin sağlanması ve güvenliğinin tesis edilmesi amacıyla
+                paylaşılabilir. Verileriniz yurt içinde veya hizmet alınan altyapılar nedeniyle yurt dışında
+                barındırılabilir.
+              </p>
+              <p className="font-semibold">Haklarınız (KVKK m.11)</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>İşlenip işlenmediğini öğrenme,</li>
+                <li>İşlenme amacını ve amaca uygun kullanılıp kullanılmadığını öğrenme,</li>
+                <li>Yurt içi/dışı aktarılan üçüncü kişileri bilme,</li>
+                <li>Eksik veya yanlış işlendi ise düzeltilmesini isteme,</li>
+                <li>Silinmesini/yok edilmesini isteme,</li>
+                <li>Otomatik sistemlerle analiz sonucu aleyhinize bir sonuca itiraz etme,</li>
+                <li>Kanuna aykırı işlem nedeniyle zarara uğrarsanız tazminat talep etme.</li>
+              </ul>
+              <p>
+                Başvuru: kvkk@egzersizlab.com adresine kimlik doğrulamalı e-posta ile başvurabilirsiniz. Detaylı
+                aydınlatma ve çerez politikası için lütfen bizimle iletişime geçin.
+              </p>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowKvkk(false)}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow hover:shadow-lg transition"
+                >
+                  Anladım
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -10,6 +10,7 @@ import Categories from './components/Categories';
 import WebinarPromo from './components/WebinarPromo';
 import Testimonials from './components/Testimonials';
 import RegistrationModal from './components/RegistrationModal';
+import LoginModal from './components/LoginModal';
 import { Course } from './types';
 
 // Mock Data
@@ -66,6 +67,7 @@ const courses: Course[] = [
 
 function App() {
   const [showRegister, setShowRegister] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const [showStickyButton, setShowStickyButton] = useState(false);
 
   // Sticky buton görünürlüğü
@@ -527,7 +529,25 @@ function App() {
       <GeminiAssistant />
 
       {/* Registration Modal */}
-      {showRegister && <RegistrationModal onClose={() => setShowRegister(false)} />}
+      {showRegister && (
+        <RegistrationModal
+          onClose={() => setShowRegister(false)}
+          onOpenLogin={() => {
+            setShowRegister(false);
+            setShowLogin(true);
+          }}
+        />
+      )}
+      {showLogin && (
+        <LoginModal
+          onClose={() => setShowLogin(false)}
+          onSuccess={() => setShowLogin(false)}
+          onOpenRegister={() => {
+            setShowLogin(false);
+            setShowRegister(true);
+          }}
+        />
+      )}
     </div>
   );
 }

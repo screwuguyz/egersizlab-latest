@@ -18,7 +18,6 @@ const passwordResetCodeSchema = new Schema<IPasswordResetCode>(
       required: true,
       lowercase: true,
       trim: true,
-      index: true,
     },
     code: {
       type: String,
@@ -28,7 +27,6 @@ const passwordResetCodeSchema = new Schema<IPasswordResetCode>(
     expiresAt: {
       type: Date,
       required: true,
-      index: { expireAfterSeconds: 0 }, // TTL index - otomatik silme
     },
     used: {
       type: Boolean,

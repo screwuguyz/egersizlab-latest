@@ -197,7 +197,15 @@ const Header: React.FC<HeaderProps> = ({ onOpenRegister }) => {
           </div>
         )}
       </header>
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+      {showLogin && (
+        <LoginModal
+          onClose={() => setShowLogin(false)}
+          onOpenRegister={() => {
+            setShowLogin(false);
+            handleOpenRegister();
+          }}
+        />
+      )}
     </>
   );
 };

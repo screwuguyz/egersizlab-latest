@@ -15,11 +15,12 @@ export const connectDatabase = async (): Promise<void> => {
     const options: mongoose.ConnectOptions = {
       // Güvenlik: SQL injection benzeri saldırılara karşı koruma
       maxPoolSize: 10, // Maksimum bağlantı sayısı
-      serverSelectionTimeoutMS: 5000, // 5 saniye timeout
+      serverSelectionTimeoutMS: 10000, // 10 saniye timeout (kurumsal ağlar için artırıldı)
       socketTimeoutMS: 45000, // Socket timeout
       
-      // Güvenlik: Yetkisiz erişimleri engelle
-      authSource: 'admin', // Admin authentication
+      // Local MongoDB için authSource gerekmez
+      // MongoDB Atlas için: authSource: 'admin'
+      ...(mongoUri.includes('mongodb+srv://') && { authSource: 'admin' }),
       
       // Performans ve güvenlik
       retryWrites: true,

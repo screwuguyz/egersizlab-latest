@@ -5,9 +5,10 @@ import ForgotPasswordModal from './ForgotPasswordModal';
 interface LoginModalProps {
   onClose: () => void;
   onSuccess?: () => void;
+  onOpenRegister?: () => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onOpenRegister }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -198,9 +199,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) => {
               </button>
               <div className="mt-5 text-center text-sm text-gray-600">
                 Henüz hesabınız yok mu?{' '}
-                <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    if (onOpenRegister) {
+                      onOpenRegister();
+                    } else {
+                      // Fallback: kayıt formunu açacak hash
+                      window.location.hash = '#register';
+                    }
+                  }}
+                  className="text-purple-600 hover:text-purple-700 font-semibold"
+                >
                   Kayıt Olun
-                </a>
+                </button>
               </div>
             </form>
           </div>

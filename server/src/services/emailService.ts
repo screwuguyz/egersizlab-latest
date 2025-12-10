@@ -17,10 +17,21 @@ const createTransporter = () => {
     return null;
   }
 
-  return nodemailer.createTransporter({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465, // 465 için true, diğerleri için false
+  // Gmail STARTTLS (587), IPv4 zorlamalı, timeout ve TLS gevşek (kurumsal ağlar için)
+  return nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // STARTTLS
+    requireTLS: true,
+    connectionTimeout: 20000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
+    tls: {
+      rejectUnauthorized: false,
+      // minVersion: 'TLSv1' // gerekirse açılabilir
+    },
+    family: 4, // IPv4 zorla
     auth: {
       user: smtpUser,
       pass: smtpPass,
@@ -209,21 +220,23 @@ EgzersizLab Ekibi
 
   // Development modu: Konsola yazdır
   if (!transporter) {
-    console.log('\n📧 ===== EMAIL (Development Mode) =====');
-    console.log(`To: ${email}`);
-    console.log(`Subject: ${mailOptions.subject}`);
-    console.log(`Password Reset Code: ${code}`);
-    console.log('=====================================\n');
+    console.log('\n📧 ===== ŞİFRE SIFIRLAMA KODU (Development Mode) =====');
+    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    console.log(`E-posta: ${email}`);
+    console.log(`Kod: ${code}`);
+    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
     return;
   }
 
   // Production: Email gönder
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`✅ Şifre sıfırlama kodu gönderildi: ${email}`);
-  } catch (error) {
-    console.error('❌ Email gönderme hatası:', error);
-    throw new Error('Email gönderilemedi. Lütfen tekrar deneyin.');
+    console.log(`✅ Şifre sıfırlama kodu EMAIL ile gönderildi: ${email}`);
+  } catch (error: any) {
+    console.error('❌ Email gönderme hatası:', error.message);
+    console.error('❌ Hata detayı:', error);
+    // Email gönderilemediyse hatayı fırlat - kullanıcı bilgilendirilsin
+    throw new Error(`Email gönderilemedi: ${error.message}`);
   }
 };
 

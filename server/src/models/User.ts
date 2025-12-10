@@ -25,7 +25,6 @@ const userSchema = new Schema<IUser>(
       lowercase: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Geçerli bir e-posta adresi giriniz'],
-      index: true, // Hızlı arama için
     },
     password: {
       type: String,
@@ -42,7 +41,15 @@ const userSchema = new Schema<IUser>(
     phone: {
       type: String,
       trim: true,
-      match: [/^[0-9+\-\s()]+$/, 'Geçerli bir telefon numarası giriniz'],
+      validate: {
+        validator: function(v: string | undefined) {
+          // Telefon boş veya undefined ise geçerli (opsiyonel)
+          if (!v || v.trim() === '') return true;
+          // Telefon varsa format kontrolü yap
+          return /^[0-9+\-\s()]+$/.test(v);
+        },
+        message: 'Geçerli bir telefon numarası giriniz',
+      },
     },
     packageType: {
       type: String,
@@ -88,8 +95,7 @@ userSchema.methods.comparePassword = async function (
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Email için unique index (performans)
-userSchema.index({ email: 1 }, { unique: true });
+// Not: Email için unique index zaten 'unique: true' ile otomatik oluşturuluyor
 
 export const User = mongoose.model<IUser>('User', userSchema);
 

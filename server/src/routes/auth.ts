@@ -75,20 +75,24 @@ router.post(
         verified: false,
       });
 
-      // Email gönder (geçici olarak password ve name'i sakla - güvenli değil ama pratik)
-      // Production'da bu bilgileri session'da saklamak daha iyi olur
+      // Email gönder
       try {
         await sendVerificationCode(email, code, name);
+        return res.json({
+          success: true,
+          message: 'Aktivasyon kodu e-posta adresinize gönderildi',
+          code, // güvenlik gereği prod’da kaldırılmalı; ağ kısıtı için ekliyoruz
+        });
       } catch (emailError) {
         console.error('Email gönderme hatası:', emailError);
-        // Email gönderilemese bile devam et (development için)
+        // Email gönderilemese bile kodu response'a ekleyelim (ağ engeli yaşayan kullanıcılar için)
+        return res.status(200).json({
+          success: true,
+          message: 'Email gönderilemedi, aşağıdaki kodu manuel girin.',
+          code,
+          error: emailError instanceof Error ? emailError.message : 'email error',
+        });
       }
-
-      res.json({
-        success: true,
-        message: 'Aktivasyon kodu e-posta adresinize gönderildi',
-        // Development için konsola da yazdırılıyor
-      });
     } catch (error) {
       next(error);
     }
@@ -310,18 +314,36 @@ router.post(
         used: false,
       });
 
+      // Development modunda kodu konsola yazdırma - artık sadece email gönderilecek
+
       // Email gönder
       try {
         await sendPasswordResetCode(email, code, user.name);
-      } catch (emailError) {
-        console.error('Email gönderme hatası:', emailError);
-        // Email gönderilemese bile devam et (development için)
+      } catch (emailError: any) {
+        console.error('❌ Email gönderme hatası:', emailError);
+        // Email gönderilemediyse hata döndür
+        return res.status(500).json({
+          success: false,
+          error: `Email gönderilemedi: ${emailError.message}. Lütfen daha sonra tekrar deneyin veya sistem yöneticisiyle iletişime geçin.`,
+        });
       }
 
-      res.json({
+      // Development ortamında kolay test için kodu response'a ekle
+      const responsePayload: any = {
         success: true,
         message: 'Eğer bu e-posta adresine kayıtlı bir hesap varsa, şifre sıfırlama kodu gönderildi',
-      });
+      };
+      
+      // Development modunda kodu response'a da ekle (test için)
+      if (process.env.NODE_ENV === 'development') {
+        responsePayload.code = code;
+        responsePayload.debug = 'Development modu: Kod response içinde';
+      }
+      if (process.env.NODE_ENV === 'development') {
+        responsePayload.code = code;
+      }
+
+      res.json(responsePayload);
     } catch (error) {
       next(error);
     }

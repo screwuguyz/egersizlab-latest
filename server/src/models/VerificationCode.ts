@@ -18,7 +18,6 @@ const verificationCodeSchema = new Schema<IVerificationCode>(
       required: true,
       lowercase: true,
       trim: true,
-      index: true,
     },
     code: {
       type: String,
@@ -28,7 +27,6 @@ const verificationCodeSchema = new Schema<IVerificationCode>(
     expiresAt: {
       type: Date,
       required: true,
-      index: { expireAfterSeconds: 0 }, // TTL index - otomatik silme
     },
     verified: {
       type: Boolean,

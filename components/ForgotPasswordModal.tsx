@@ -26,6 +26,16 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ onClose }) =>
         // Kullanıcı adını almak için (email'den tahmin edilebilir veya backend'den dönebilir)
         // Şimdilik email'in @ öncesi kısmını kullanıyoruz
         setUserName(email.split('@')[0]);
+        
+        // Development modunda kodu console'a yazdır
+        if ((response as any).code) {
+          console.log('\n========================================');
+          console.log('SIFRE SIFIRLAMA KODU');
+          console.log('========================================');
+          console.log(`E-posta: ${email}`);
+          console.log(`KOD: ${(response as any).code}`);
+          console.log('========================================\n');
+        }
       } else {
         setError(response.error || 'Bir hata oluştu. Lütfen tekrar deneyin.');
       }
