@@ -113,17 +113,49 @@ class ApiService {
   }
 
   async login(email: string, password: string) {
-    const response = await this.request<{ token: string; user: any }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    const token = this.getToken();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
 
-    // Backend direkt token ve user döndürüyor (data wrapper yok)
-    if (response.success && (response as any).token) {
-      localStorage.setItem('token', (response as any).token);
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
-    return response;
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      // Login için 401 hatası normal (kullanıcı bulunamadı veya şifre yanlış)
+      // Bu durumda otomatik yönlendirme yapma, sadece hata mesajını döndür
+      if (response.status === 401) {
+        return {
+          success: false,
+          error: data.error || 'E-posta veya şifre hatalı',
+        };
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Bir hata oluştu');
+      }
+
+      // Başarılı login - token'ı kaydet
+      if (data.success && data.token) {
+        localStorage.setItem('token', data.token);
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network hatası. Lütfen internet bağlantınızı kontrol edin.');
+    }
   }
 
   async getCurrentUser() {
@@ -154,6 +186,26 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({ email, code, newPassword }),
     });
+  }
+
+  // Dashboard Verilerini Kaydet
+  async saveDashboardData(data: {
+    assessmentResults?: any;
+    exercisePrograms?: any[];
+    progressData?: any;
+    notifications?: any[];
+    photos?: any;
+    formData?: any;
+  }) {
+    return this.request('/auth/dashboard/data', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Dashboard Verilerini Getir
+  async getDashboardData() {
+    return this.request('/auth/dashboard/data');
   }
 }
 

@@ -11,6 +11,16 @@ export interface IUser extends Document {
   phone?: string;
   packageType: 'none' | 'basic' | 'pro' | 'premium';
   packageExpiry?: Date;
+  dashboardData?: {
+    assessmentResults?: any;
+    exercisePrograms?: any[];
+    progressData?: any;
+    notifications?: any[];
+    photos?: any;
+    formData?: any;
+    lastLogin?: Date;
+    lastAssessmentDate?: Date; // Son assessment tarihi
+  };
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -58,6 +68,19 @@ const userSchema = new Schema<IUser>(
     },
     packageExpiry: {
       type: Date,
+    },
+    dashboardData: {
+      type: {
+        assessmentResults: Schema.Types.Mixed,
+        exercisePrograms: [Schema.Types.Mixed],
+        progressData: Schema.Types.Mixed,
+        notifications: [Schema.Types.Mixed],
+        photos: Schema.Types.Mixed,
+        formData: Schema.Types.Mixed,
+        lastLogin: Date,
+        lastAssessmentDate: Date, // Son assessment tarihi
+      },
+      default: {},
     },
   },
   {

@@ -5,6 +5,7 @@ import AnimatedLogo from './AnimatedLogo';
 
 interface HeaderProps {
   onOpenRegister?: () => void;
+  isAuthenticated?: boolean;
 }
 
 const navItems = [
@@ -17,7 +18,10 @@ const navItems = [
   { href: '#contact', label: 'İletişim' },
 ];
 
-const Header: React.FC<HeaderProps> = ({ onOpenRegister }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  onOpenRegister, 
+  isAuthenticated = false
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeLink, setActiveLink] = useState<string>('#hero');
   const [showLogin, setShowLogin] = useState(false);

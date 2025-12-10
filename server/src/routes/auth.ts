@@ -218,7 +218,8 @@ router.post(
       if (!user) {
         return res.status(401).json({
           success: false,
-          error: 'E-posta veya şifre hatalı', // Güvenlik: Hangi alanın hatalı olduğunu söyleme
+          error: 'Kullanıcı bulunamadı',
+          errorCode: 'USER_NOT_FOUND',
         });
       }
 
@@ -227,7 +228,8 @@ router.post(
       if (!isPasswordCorrect) {
         return res.status(401).json({
           success: false,
-          error: 'E-posta veya şifre hatalı', // Güvenlik: Aynı mesaj
+          error: 'Şifre hatalı',
+          errorCode: 'INVALID_PASSWORD',
         });
       }
 
@@ -416,6 +418,115 @@ router.post(
       res.json({
         success: true,
         message: 'Şifreniz başarıyla güncellendi. Lütfen yeni şifrenizle giriş yapın.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * Dashboard Verilerini Kaydet
+ */
+router.put(
+  '/dashboard/data',
+  protect, // Kullanıcı giriş yapmış olmalı
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: 'Yetkilendirme hatası',
+        });
+      }
+
+      const { assessmentResults, exercisePrograms, progressData, notifications, photos, formData } = req.body;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'Kullanıcı bulunamadı',
+        });
+      }
+
+      // Dashboard verilerini güncelle - Her yeni assessment eski verileri üzerine yazar
+      if (!user.dashboardData) {
+        user.dashboardData = {};
+      }
+
+      // Assessment verileri geldiğinde - ESKİ VERİLERİ SİL, YENİSİNİ KAYDET
+      if (assessmentResults !== undefined) {
+        // Eski assessment verilerini tamamen sil, yenisini kaydet
+        user.dashboardData.assessmentResults = assessmentResults;
+        // Assessment yapıldığında tarihi güncelle
+        user.dashboardData.lastAssessmentDate = new Date();
+      }
+      
+      // Fotoğraflar geldiğinde - ESKİ FOTOĞRAFLARI SİL, YENİLERİNİ KAYDET
+      if (photos !== undefined) {
+        user.dashboardData.photos = photos;
+      }
+      
+      // Form verileri geldiğinde - ESKİ FORM VERİLERİNİ SİL, YENİSİNİ KAYDET
+      if (formData !== undefined) {
+        user.dashboardData.formData = formData;
+      }
+      
+      // Diğer veriler (egzersiz programları, ilerleme, bildirimler) - bunlar korunur
+      if (exercisePrograms !== undefined) {
+        user.dashboardData.exercisePrograms = exercisePrograms;
+      }
+      if (progressData !== undefined) {
+        user.dashboardData.progressData = progressData;
+      }
+      if (notifications !== undefined) {
+        user.dashboardData.notifications = notifications;
+      }
+
+      user.dashboardData.lastLogin = new Date();
+
+      await user.save();
+
+      res.json({
+        success: true,
+        message: 'Dashboard verileri başarıyla kaydedildi',
+        data: user.dashboardData,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * Dashboard Verilerini Getir
+ */
+router.get(
+  '/dashboard/data',
+  protect,
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: 'Yetkilendirme hatası',
+        });
+      }
+
+      const user = await User.findById(userId).select('dashboardData');
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'Kullanıcı bulunamadı',
+        });
+      }
+
+      res.json({
+        success: true,
+        data: user.dashboardData || {},
       });
     } catch (error) {
       next(error);

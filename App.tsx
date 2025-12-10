@@ -69,6 +69,13 @@ function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showStickyButton, setShowStickyButton] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Authentication kontrolü
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
 
   // Sticky buton görünürlüğü
   useEffect(() => {
@@ -99,7 +106,10 @@ function App() {
           animation: fade-in 0.5s ease-out;
         }
       `}</style>
-      <Header onOpenRegister={() => setShowRegister(true)} />
+      <Header 
+        onOpenRegister={() => setShowRegister(true)} 
+        isAuthenticated={isAuthenticated}
+      />
       <Hero />
 
       {/* Güven & İkna Şeridi */}

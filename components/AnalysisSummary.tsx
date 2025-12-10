@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface AnalysisSummaryProps {
   open: boolean;
@@ -69,15 +69,16 @@ const packages: PackageItem[] = [
 ];
 
 const lockedTests = [
-  { icon: '🛡️', title: 'Detayli Kas Kuvvet Analizi', subtitle: 'Manuel kas testi simulasyonu', desc: 'Hangi kaslariniz uykuda, hangileri asiri calisiyor? (Gluteal amnezi, core stabilizasyonu vb.)' },
-  { icon: '📏', title: 'Kas Kisalik ve Esneklik Testleri', subtitle: '', desc: 'Agrisinin sebebi kas kisaligi mi? Hamstring, pektoral, iliopsoas, piriformis gerginlik testleri.' },
-  { icon: '📐', title: 'Eklem Hareket Acikligi', subtitle: 'Gonyometrik analiz', desc: 'Eklemler tam aciyla hareket ediyor mu, kisitlilik derecesi nedir?' },
-  { icon: '🧠', title: 'Norodinamik Testler', subtitle: 'Sinir germe testleri', desc: 'Agri kas kaynakli mi yoksa sinir sikismasi mi (Fitik/Siyatik)?' },
-  { icon: '⚖️', title: 'Fonksiyonel Denge ve Propriosepsiyon', subtitle: '', desc: 'Vucudun uzaydaki konum algisi ve denge stratejisi.' },
-  { icon: '🩺', title: 'Hareket Kalitesi Analizi', subtitle: '', desc: 'Comelme, egilme ve uzanma sirasinda omurga biyomekanigi kontrolu.' },
+  { icon: '🛡️', title: 'Detaylı Kas Kuvvet Analizi', subtitle: 'Manuel kas testi simülasyonu', desc: 'Hangi kaslarınız uykuda, hangileri aşırı çalışıyor? (Gluteal amnezi, core stabilizasyonu vb.)' },
+  { icon: '📏', title: 'Kas Kısalık ve Esneklik Testleri', subtitle: 'Ağrısının sebebi kas kısalığı mı?', desc: 'Hamstring, pektoral, iliopsoas, piriformis gerginlik testleri.' },
+  { icon: '📐', title: 'Eklem Hareket Açıklığı', subtitle: 'Gonyometrik analiz', desc: 'Eklemler tam açıyla hareket ediyor mu, kısıtlılık derecesi nedir?' },
+  { icon: '🧠', title: 'Nörodinamik Testler', subtitle: 'Sinir germe testleri', desc: 'Ağrı kas kaynaklı mı yoksa sinir sıkışması mı (Fıtık/Siyatik)?' },
+  { icon: '⚖️', title: 'Fonksiyonel Denge ve Propriosepsiyon', subtitle: 'Vücudun uzaydaki konum algısı ve denge stratejisi', desc: 'Vücudun uzaydaki konum algısı ve denge stratejisi.' },
+  { icon: '🩺', title: 'Hareket Kalitesi Analizi', subtitle: 'Çömelme, eğilme ve uzanma sırasında omurga biyomekaniği kontrolü', desc: 'Çömelme, eğilme ve uzanma sırasında omurga biyomekaniği kontrolü.' },
 ];
 
 const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ open, onClose, onAddToCart, cartItems = [] }) => {
+  const [currentPage, setCurrentPage] = useState(0);
   const isInCart = (id: string) => cartItems.some(item => item.id === id);
 
   const handleAddToCart = (pkg: { id: string; name: string; price?: string }) => {
@@ -86,912 +87,888 @@ const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ open, onClose, onAddT
     }
   };
 
+  const nextPage = () => {
+    if (currentPage < 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-      <div className="bg-white w-[99vw] h-[98vh] max-w-[1800px] rounded-xl shadow-2xl overflow-hidden relative summary-shell">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl overflow-hidden relative">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 h-10 w-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 z-20"
+          className="absolute top-4 right-4 h-12 w-12 rounded-full bg-white border-2 border-gray-200 shadow-lg flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 z-30 text-2xl font-bold"
           aria-label="Kapat"
         >
           ×
         </button>
 
-        <div className="summary-content grid lg:grid-cols-3 gap-2 p-2 h-full">
-          {/* Flow arrows hidden for compact view */}
-
-          <div className="hero-col">
-            {/* Success Badge */}
-            <div className="success-badge-lg">
-              <span className="success-check">✓</span>
-              <span>Ön Profiliniz Sisteme İşlendi</span>
-            </div>
-
-            {/* Status Card */}
-            <div className="status-card-lg">
-              <div className="status-icon-lg">📤</div>
-              <h3 className="status-title-lg">Verileriniz Fizyoterapiste İletildi</h3>
-              <p className="status-sub-lg">✓ Tüm fotoğraflar ve ağrı haritanız başarıyla gönderildi</p>
-              
-              {/* AI Banner */}
-              <div className="ai-banner-lg">
-                <span className="ai-icon-lg">🤖</span>
-                <div className="ai-text-lg">
-                  <strong>Yapay Zeka Ön Analizi Devam Ediyor</strong>
-                  <span>Duruş analizi, kas dengesizlik tespiti işleniyor...</span>
+        {/* Carousel Container */}
+        <div className="carousel-container">
+          <div 
+            className="carousel-wrapper"
+            style={{ 
+              transform: `translateX(calc(-${currentPage} * 50%))`
+            }}
+          >
+            {/* Page 1: Status & Progress */}
+            <div className="carousel-page">
+              <div className="page-content">
+                {/* Success Badge */}
+                <div className="success-badge">
+                  <span className="success-check">✓</span>
+                  <span>Ön Profiliniz Sisteme İşlendi</span>
                 </div>
-              </div>
-            </div>
 
-            {/* CTA */}
-            <div className="cta-card-lg">
-              <span className="cta-badge-lg">🎯 SON ADIM</span>
-              <p className="cta-text-lg">Fizyoterapistinizin egzersiz reçetenizi hazırlayabilmesi için <strong>size uygun paketi seçin</strong></p>
-            </div>
-
-            {/* Progress */}
-            <div className="progress-card-lg">
-              <div className="progress-header-lg">
-                <span>Süreç İlerlemesi</span>
-                <span className="progress-pct-lg">75%</span>
-              </div>
-              <div className="progress-track-lg">
-                <div className="progress-fill-lg" style={{ width: '75%' }}></div>
-              </div>
-              <div className="progress-steps-lg">
-                <span className="step-lg done">✓ Bilgiler Gönderildi</span>
-                <span className="step-lg current">⏳ Paket Seçimi</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="packages-col">
-            <h3 className="col-title-lg">🎁 Hizmet Paketleri</h3>
-            <div className="packages-list">
-              {packages.map((pkg) => {
-                const inCart = isInCart(pkg.id);
-                return (
-                  <div key={pkg.id} className={`pkg-card ${pkg.id === 'medium' ? 'recommended' : ''} ${inCart ? 'in-cart' : ''}`}>
-                    <div className="pkg-top">
-                      <span className={`pkg-badge-lg ${pkg.id}`}>{pkg.badge}</span>
-                      <span className="pkg-price-lg">{pkg.price}<small>₺</small></span>
+                {/* Status Card */}
+                <div className="status-card">
+                  <div className="status-icon">📤</div>
+                  <h3 className="status-title">Verileriniz Fizyoterapiste İletildi</h3>
+                  <p className="status-sub">✓ Tüm fotoğraflar ve ağrı haritanız başarıyla gönderildi</p>
+                  
+                  {/* AI Banner */}
+                  <div className="ai-banner">
+                    <span className="ai-icon">🤖</span>
+                    <div className="ai-text">
+                      <strong>Yapay Zeka Ön Analizi Devam Ediyor</strong>
+                      <span>Duruş analizi, kas dengesizlik tespiti işleniyor...</span>
                     </div>
-                    <div className="pkg-name-lg">{pkg.name}</div>
-                    <ul className="pkg-features-lg">
-                      {pkg.features.slice(0, 3).map((f, idx) => (
-                        <li key={idx}><span className="feat-check-lg">✓</span>{f}</li>
-                      ))}
-                      {pkg.features.length > 3 && <li className="more-feat">+{pkg.features.length - 3} özellik daha</li>}
-                    </ul>
-                    {inCart ? (
-                      <button className="cart-btn-lg added">
-                        ✓ Sepete Eklendi
-                      </button>
-                    ) : (
-                      <button 
-                        className={`cart-btn-lg ${pkg.id === 'medium' ? 'green' : ''}`}
-                        onClick={() => handleAddToCart(pkg)}
-                      >
-                        🛒 Sepete Ekle
-                      </button>
-                    )}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="tests-col">
-            <h3 className="col-title-lg">🔒 Paket Sonrası Klinik Testler</h3>
-            <p className="col-sub-lg">Bu testler olmadan reçete yazmayız; paket alımından sonra uygulayacağız.</p>
-            <div className="tests-grid">
-              {lockedTests.map((test, idx) => (
-                <div key={idx} className="test-item">
-                  <span className="test-icon-lg">{test.icon}</span>
-                  <div className="test-content">
-                    <span className="test-title-lg">{test.title}</span>
-                    {test.subtitle && <span className="test-subtitle">{test.subtitle}</span>}
-                    <span className="test-desc-lg">{test.desc}</span>
-                  </div>
-                  <span className="lock-icon">🔒</span>
                 </div>
-              ))}
+
+                {/* CTA */}
+                <div className="cta-card">
+                  <span className="cta-badge">🎯 SON ADIM</span>
+                  <p className="cta-text">
+                    Fizyoterapistinizin egzersiz reçetenizi hazırlayabilmesi için <strong>size uygun paketi seçin</strong>
+                  </p>
+                </div>
+
+                {/* Progress */}
+                <div className="progress-card">
+                  <div className="progress-header">
+                    <span>Süreç İlerlemesi</span>
+                    <span className="progress-pct">75%</span>
+                  </div>
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{ width: '75%' }}></div>
+                  </div>
+                  <div className="progress-steps">
+                    <span className="step done">✓ Bilgiler Gönderildi</span>
+                    <span className="step current">⏳ Paket Seçimi</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="info-box-lg">
-              <span className="info-icon-lg">💡</span>
-              <div>
-                <strong>Neden bu testler?</strong>
-                <span>Egzersiz bir ilaçtır; rastgele verilemez. Bu testlerle nokta atışı tedavi protokolü oluşturuyoruz.</span>
+
+            {/* Page 2: Packages & Tests Side by Side */}
+            <div className="carousel-page">
+              <div className="page-content-two-columns">
+                {/* Left Side: Packages */}
+                <div className="packages-column">
+                  <h2 className="column-title">🎁 Hizmet Paketleri</h2>
+                  <div className="packages-list-vertical">
+                    {packages.map((pkg) => {
+                      const inCart = isInCart(pkg.id);
+                      return (
+                        <div key={pkg.id} className={`package-card-vertical ${pkg.id === 'medium' ? 'recommended' : ''} ${inCart ? 'in-cart' : ''}`}>
+                          <div className="package-header">
+                            <span className={`package-badge ${pkg.id}`}>{pkg.badge}</span>
+                            <span className="package-price">{pkg.price}<small>₺</small></span>
+                          </div>
+                          <h3 className="package-name">{pkg.name}</h3>
+                          <ul className="package-features">
+                            {pkg.features.map((f, idx) => (
+                              <li key={idx}>
+                                <span className="feat-check">✓</span>
+                                {f}
+                              </li>
+                            ))}
+                          </ul>
+                          {inCart ? (
+                            <button className="cart-btn added">
+                              ✓ Sepete Eklendi
+                            </button>
+                          ) : (
+                            <button 
+                              className={`cart-btn ${pkg.id === 'medium' ? 'green' : ''}`}
+                              onClick={() => handleAddToCart(pkg)}
+                            >
+                              🛒 Sepete Ekle
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Center Arrow */}
+                <div className="center-arrow">
+                  <button 
+                    onClick={prevPage}
+                    className="arrow-button"
+                    aria-label="Önceki sayfa"
+                  >
+                    →
+                  </button>
+                </div>
+
+                {/* Right Side: Clinical Tests */}
+                <div className="tests-column">
+                  <div className="tests-header">
+                    <h2 className="column-title">🔒 Paket Sonrası Klinik Testler</h2>
+                    <p className="column-subtitle">Bu testler olmadan reçete yazmayız; paket alımından sonra uygulayacağız.</p>
+                  </div>
+                  
+                  <div className="tests-list-vertical">
+                    {lockedTests.map((test, idx) => (
+                      <div key={idx} className="test-card-vertical">
+                        <div className="test-header">
+                          <span className="test-icon">{test.icon}</span>
+                          <span className="lock-icon">🔒</span>
+                        </div>
+                        <div className="test-content">
+                          <h4 className="test-title">{test.title}</h4>
+                          {test.subtitle && <p className="test-subtitle">{test.subtitle}</p>}
+                          <p className="test-desc">{test.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="info-box">
+                    <span className="info-icon">💡</span>
+                    <div>
+                      <strong>Neden bu testler?</strong>
+                      <p>Egzersiz bir ilaçtır; rastgele verilemez. Bu testlerle nokta atışı tedavi protokolü oluşturuyoruz.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        
+
+        {/* Navigation Buttons - Only on Page 1 */}
+        {currentPage === 0 && (
+          <button
+            onClick={nextPage}
+            className="nav-btn nav-btn-right"
+            aria-label="Sonraki"
+          >
+            →
+          </button>
+        )}
+
+        {/* Page Indicators */}
+        <div className="page-indicators">
+          {[0, 1].map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`indicator ${currentPage === page ? 'active' : ''}`}
+              aria-label={`Sayfa ${page + 1}`}
+            />
+          ))}
+        </div>
+
+        <style>{`
+          .carousel-container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+          }
+          .carousel-wrapper {
+            display: flex;
+            width: 200%;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+          }
+          .carousel-page {
+            width: 50%;
+            min-width: 50%;
+            max-width: 50%;
+            height: 100%;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+          }
+          .page-content {
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            box-sizing: border-box;
+            overflow-y: auto;
+          }
+          .page-content-two-columns {
+            padding: 30px;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+          }
+          
+          /* Page 1 Styles */
+          .success-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            width: fit-content;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+          }
+          .success-check {
+            width: 28px;
+            height: 28px;
+            background: #fff;
+            color: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 800;
+          }
+          .status-card {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          }
+          .status-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+          }
+          .status-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0 0 12px 0;
+          }
+          .status-sub {
+            font-size: 18px;
+            color: #10b981;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+          }
+          .ai-banner {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            padding: 20px 24px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-align: left;
+            margin-top: 20px;
+          }
+          .ai-icon {
+            font-size: 40px;
+            flex-shrink: 0;
+          }
+          .ai-text {
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+          .ai-text strong {
+            display: block;
+            font-size: 20px;
+            font-weight: 700;
+          }
+          .ai-text span {
+            font-size: 16px;
+            opacity: 0.9;
+          }
+          .cta-card {
+            background: linear-gradient(135deg, #fbbf24, #f97316);
+            padding: 24px 32px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+          }
+          .cta-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.9);
+            color: #ea580c;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+          }
+          .cta-text {
+            font-size: 20px;
+            color: #fff;
+            margin: 0;
+            line-height: 1.5;
+          }
+          .cta-text strong {
+            display: block;
+            font-size: 24px;
+            margin-top: 8px;
+          }
+          .progress-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+          }
+          .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 12px;
+          }
+          .progress-pct {
+            background: #10b981;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 700;
+          }
+          .progress-track {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+          }
+          .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+          }
+          .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+          }
+          .step {
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            color: #64748b;
+          }
+          .step.done {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+            color: #047857;
+          }
+          .step.current {
+            background: #fef3c7;
+            border-color: #fde047;
+            color: #a16207;
+          }
+          
+          /* Page 2 Styles - Two Column Layout */
+          .packages-column, .tests-column {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+          }
+          .packages-column {
+            padding-right: 10px;
+          }
+          .tests-column {
+            padding-left: 10px;
+            position: relative;
+          }
+          .tests-header {
+            margin-bottom: 16px;
+            filter: blur(0.5px);
+            opacity: 0.9;
+          }
+          .tests-list-vertical {
+            filter: blur(1.5px);
+            opacity: 0.85;
+          }
+          .tests-column .info-box {
+            filter: blur(0.5px);
+            opacity: 0.9;
+          }
+          .column-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            text-align: center;
+            margin: 0 0 16px 0;
+          }
+          .column-subtitle {
+            font-size: 16px;
+            color: #64748b;
+            text-align: center;
+            margin: 0 0 20px 0;
+            line-height: 1.5;
+          }
+          .packages-list-vertical, .tests-list-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+            overflow-y: auto;
+          }
+          .package-card-vertical {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+          }
+          .package-card-vertical:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+          }
+          .package-card-vertical.recommended {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+          }
+          .package-card-vertical.in-cart {
+            border-color: #10b981 !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+          }
+          .package-card-vertical .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+          }
+          .package-card-vertical .package-badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #e2e8f0;
+            color: #64748b;
+          }
+          .package-card-vertical .package-badge.medium {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+          }
+          .package-card-vertical .package-badge.premium {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+          }
+          .package-card-vertical .package-price {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+          }
+          .package-card-vertical .package-price small {
+            font-size: 16px;
+            color: #64748b;
+          }
+          .package-card-vertical .package-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 12px 0;
+            line-height: 1.3;
+          }
+          .package-card-vertical .package-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 16px 0;
+            flex: 1;
+          }
+          .package-card-vertical .package-features li {
+            font-size: 15px;
+            color: #475569;
+            padding: 6px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.4;
+          }
+          .package-card-vertical .feat-check {
+            color: #10b981;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 16px;
+          }
+          .package-card-vertical .cart-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+          }
+          .package-card-vertical .cart-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+          }
+          .package-card-vertical .cart-btn.green {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+          }
+          .package-card-vertical .cart-btn.added {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+          }
+          .center-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+          }
+          .arrow-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: #10b981;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .arrow-button:hover {
+            background: #059669;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+          }
+          .test-card-vertical {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: all 0.2s;
+          }
+          .test-card-vertical:hover {
+            border-color: #10b981;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+          }
+          .test-card-vertical .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .test-card-vertical .test-icon {
+            font-size: 32px;
+          }
+          .test-card-vertical .lock-icon {
+            font-size: 20px;
+            opacity: 0.5;
+          }
+          .test-card-vertical .test-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 6px 0;
+            line-height: 1.3;
+          }
+          .test-card-vertical .test-subtitle {
+            font-size: 15px;
+            color: #6366f1;
+            font-weight: 600;
+            margin: 0 0 6px 0;
+          }
+          .test-card-vertical .test-desc {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.4;
+            margin: 0;
+          }
+          .tests-column .info-box {
+            margin-top: 16px;
+            padding: 16px;
+            flex-shrink: 0;
+          }
+          .tests-column .info-box strong {
+            font-size: 16px;
+            color: #92400e;
+            margin-bottom: 6px;
+          }
+          .tests-column .info-box p {
+            font-size: 14px;
+            color: #a16207;
+            margin: 0;
+            line-height: 1.4;
+          }
+          .package-card {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          }
+          .package-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+          }
+          .package-card.recommended {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.2);
+          }
+          .package-card.in-cart {
+            border-color: #10b981 !important;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+          }
+          .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+          }
+          .package-badge {
+            font-size: 14px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: #e2e8f0;
+            color: #64748b;
+          }
+          .package-badge.medium {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+          }
+          .package-badge.premium {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+          }
+          .package-price {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+          }
+          .package-price small {
+            font-size: 20px;
+            color: #64748b;
+          }
+          .package-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 20px 0;
+            line-height: 1.3;
+          }
+          .package-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 24px 0;
+            flex: 1;
+          }
+          .package-features li {
+            font-size: 18px;
+            color: #475569;
+            padding: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.5;
+          }
+          .package-features .more-feat {
+            color: #94a3b8;
+            font-style: italic;
+            padding-left: 24px;
+          }
+          .feat-check {
+            color: #10b981;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 20px;
+          }
+          .cart-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+          }
+          .cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+          }
+          .cart-btn.green {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+          }
+          .cart-btn.green:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+          }
+          .cart-btn.added {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+          }
+          .cart-btn.added:hover {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+          }
+          
+          /* Info Box (used in Page 2) */
+          .info-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 16px;
+          }
+          .info-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+          }
+          
+          /* Navigation */
+          .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            font-size: 28px;
+            color: #10b981;
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .nav-btn:hover {
+            background: #10b981;
+            color: #fff;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+          }
+          .nav-btn-left {
+            left: 20px;
+          }
+          .nav-btn-right {
+            right: 20px;
+          }
+          
+          /* Page Indicators */
+          .page-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 20;
+          }
+          .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #10b981;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+          }
+          .indicator.active {
+            background: #10b981;
+            width: 32px;
+            border-radius: 6px;
+          }
+          
+          @media (max-width: 1400px) {
+            .page-content-two-columns {
+              grid-template-columns: 1fr auto 1fr;
+              gap: 15px;
+              padding: 20px;
+            }
+            .column-title {
+              font-size: 24px;
+            }
+            .package-card-vertical .package-name {
+              font-size: 18px;
+            }
+            .package-card-vertical .package-features li {
+              font-size: 14px;
+            }
+            .test-card-vertical .test-title {
+              font-size: 16px;
+            }
+            .test-card-vertical .test-desc {
+              font-size: 13px;
+            }
+          }
+          @media (max-width: 1024px) {
+            .page-content-two-columns {
+              grid-template-columns: 1fr;
+              gap: 20px;
+            }
+            .center-arrow {
+              display: none;
+            }
+            .page-content {
+              padding: 24px;
+            }
+          }
+        `}</style>
       </div>
-
-      <style>{`
-        .summary-shell {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-        }
-        .summary-content {
-          position: relative;
-          flex: 1;
-          overflow: hidden;
-        }
-        
-        /* Hero Column */
-        .hero-col {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          justify-content: center;
-          height: 100%;
-        }
-        .success-badge-lg {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          background: linear-gradient(135deg, #10b981, #059669);
-          color: #fff;
-          padding: 10px 16px;
-          border-radius: 50px;
-          font-size: 14px;
-          font-weight: 700;
-          width: fit-content;
-          align-self: center;
-        }
-        .success-check {
-          width: 20px;
-          height: 20px;
-          background: #fff;
-          color: #10b981;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: 800;
-        }
-        .status-card-lg {
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 14px;
-          text-align: center;
-        }
-        .status-icon-lg {
-          font-size: 36px;
-          margin-bottom: 6px;
-        }
-        .status-title-lg {
-          font-size: 16px;
-          font-weight: 800;
-          color: #1e293b;
-          margin: 0 0 4px 0;
-        }
-        .status-sub-lg {
-          font-size: 12px;
-          color: #10b981;
-          font-weight: 600;
-          margin: 0 0 10px 0;
-        }
-        .ai-banner-lg {
-          background: linear-gradient(135deg, #4f46e5, #7c3aed);
-          padding: 10px 12px;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          text-align: left;
-        }
-        .ai-icon-lg {
-          font-size: 24px;
-        }
-        .ai-text-lg {
-          color: #fff;
-        }
-        .ai-text-lg strong {
-          display: block;
-          font-size: 13px;
-        }
-        .ai-text-lg span {
-          font-size: 11px;
-          opacity: 0.9;
-        }
-        .cta-card-lg {
-          background: linear-gradient(135deg, #fbbf24, #f97316);
-          padding: 12px 16px;
-          border-radius: 12px;
-          text-align: center;
-        }
-        .cta-badge-lg {
-          display: inline-block;
-          background: rgba(255,255,255,0.9);
-          color: #ea580c;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 800;
-          margin-bottom: 6px;
-        }
-        .cta-text-lg {
-          font-size: 13px;
-          color: #fff;
-          margin: 0;
-          line-height: 1.3;
-        }
-        .cta-text-lg strong {
-          font-size: 15px;
-        }
-        .progress-card-lg {
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          padding: 10px;
-        }
-        .progress-header-lg {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 12px;
-          font-weight: 600;
-          color: #64748b;
-          margin-bottom: 6px;
-        }
-        .progress-pct-lg {
-          background: #10b981;
-          color: #fff;
-          padding: 3px 10px;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 700;
-        }
-        .progress-track-lg {
-          height: 8px;
-          background: #e2e8f0;
-          border-radius: 8px;
-          overflow: hidden;
-          margin-bottom: 8px;
-        }
-        .progress-fill-lg {
-          height: 100%;
-          background: linear-gradient(90deg, #10b981, #34d399);
-          border-radius: 8px;
-        }
-        .progress-steps-lg {
-          display: flex;
-          justify-content: center;
-          gap: 10px;
-        }
-        .step-lg {
-          font-size: 11px;
-          font-weight: 600;
-          padding: 5px 12px;
-          border-radius: 6px;
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          color: #64748b;
-        }
-        .step-lg.done {
-          background: #ecfdf5;
-          border-color: #a7f3d0;
-          color: #047857;
-        }
-        .step-lg.current {
-          background: #fef3c7;
-          border-color: #fde047;
-          color: #a16207;
-        }
-        
-        /* Packages Column */
-        .packages-col, .tests-col {
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 10px;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
-        .col-title-lg {
-          font-size: 16px;
-          font-weight: 700;
-          color: #1e293b;
-          text-align: center;
-          margin: 0 0 8px 0;
-        }
-        .col-sub-lg {
-          font-size: 11px;
-          color: #64748b;
-          text-align: center;
-          margin: 0 0 8px 0;
-        }
-        .packages-list {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          flex: 1;
-          overflow: hidden;
-        }
-        .pkg-card {
-          background: #f8fafc;
-          border: 2px solid #e2e8f0;
-          border-radius: 10px;
-          padding: 10px;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          min-height: 0;
-        }
-        .pkg-card.recommended {
-          border-color: #10b981;
-          background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-        }
-        .pkg-top {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 4px;
-        }
-        .pkg-badge-lg {
-          font-size: 10px;
-          font-weight: 700;
-          padding: 3px 8px;
-          border-radius: 20px;
-          background: #e2e8f0;
-          color: #64748b;
-        }
-        .pkg-badge-lg.medium {
-          background: linear-gradient(135deg, #10b981, #059669);
-          color: #fff;
-        }
-        .pkg-badge-lg.premium {
-          background: linear-gradient(135deg, #f59e0b, #d97706);
-          color: #fff;
-        }
-        .pkg-price-lg {
-          font-size: 18px;
-          font-weight: 800;
-          color: #1e293b;
-        }
-        .pkg-price-lg small {
-          font-size: 12px;
-          color: #64748b;
-        }
-        .pkg-name-lg {
-          font-size: 13px;
-          font-weight: 700;
-          color: #1e293b;
-          margin-bottom: 4px;
-        }
-        .pkg-features-lg {
-          list-style: none;
-          padding: 0;
-          margin: 0 0 6px 0;
-          flex: 1;
-          overflow: hidden;
-        }
-        .pkg-features-lg li {
-          font-size: 11px;
-          color: #475569;
-          padding: 2px 0;
-          display: flex;
-          align-items: flex-start;
-          gap: 4px;
-        }
-        .pkg-features-lg .more-feat {
-          color: #94a3b8;
-          font-style: italic;
-          padding-left: 14px;
-        }
-        .feat-check-lg {
-          color: #10b981;
-          font-weight: 700;
-          flex-shrink: 0;
-        }
-        .cart-btn-lg {
-          width: 100%;
-          padding: 8px;
-          border: none;
-          border-radius: 8px;
-          background: linear-gradient(135deg, #3b82f6, #2563eb);
-          color: #fff;
-          font-size: 12px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.2s;
-          flex-shrink: 0;
-        }
-        .cart-btn-lg:hover {
-          transform: translateY(-1px);
-        }
-        .cart-btn-lg.green {
-          background: linear-gradient(135deg, #10b981, #059669);
-        }
-        .cart-btn-lg.added {
-          background: linear-gradient(135deg, #6b7280, #4b5563);
-        }
-        .cart-btn-lg.added:hover {
-          background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-        .pkg-card.in-cart {
-          border-color: #10b981 !important;
-          box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-        }
-        
-        /* Tests Column */
-        .tests-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 6px;
-          flex: 1;
-          overflow: hidden;
-        }
-        .test-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 6px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 8px;
-          min-height: 0;
-          overflow: hidden;
-        }
-        .test-icon-lg {
-          font-size: 18px;
-          flex-shrink: 0;
-        }
-        .test-content {
-          flex: 1;
-          min-width: 0;
-          overflow: hidden;
-        }
-        .test-title-lg {
-          display: block;
-          font-size: 11px;
-          font-weight: 700;
-          color: #1e293b;
-          line-height: 1.2;
-        }
-        .test-subtitle {
-          display: block;
-          font-size: 9px;
-          color: #6366f1;
-          font-weight: 600;
-        }
-        .test-desc-lg {
-          display: block;
-          font-size: 10px;
-          color: #64748b;
-          line-height: 1.2;
-          margin-top: 2px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-        }
-        .lock-icon {
-          font-size: 12px;
-          opacity: 0.5;
-          flex-shrink: 0;
-        }
-        .info-box-lg {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: linear-gradient(135deg, #fef3c7, #fde68a);
-          border: 1px solid #fbbf24;
-          border-radius: 8px;
-          padding: 8px;
-          margin-top: 6px;
-          flex-shrink: 0;
-        }
-        .info-icon-lg {
-          font-size: 18px;
-          flex-shrink: 0;
-        }
-        .info-box-lg strong {
-          font-size: 12px;
-          color: #92400e;
-          margin-right: 4px;
-        }
-        .info-box-lg span {
-          font-size: 11px;
-          color: #a16207;
-        }
-        
-        /* Checkout Bar */
-        .checkout-bar {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          background: linear-gradient(135deg, #10b981, #059669);
-          padding: 12px 20px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-          z-index: 30;
-          animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp {
-          from { transform: translateY(100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        .checkout-info {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-        .checkout-items {
-          font-size: 14px;
-          font-weight: 600;
-          color: rgba(255,255,255,0.9);
-        }
-        .checkout-total {
-          font-size: 22px;
-          font-weight: 800;
-          color: #fff;
-        }
-        .checkout-btn {
-          padding: 12px 32px;
-          background: #fff;
-          border: none;
-          border-radius: 10px;
-          font-size: 15px;
-          font-weight: 800;
-          color: #059669;
-          cursor: pointer;
-          transition: all 0.2s;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        }
-        .checkout-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-        }
-        /* New Hero Surface */
-        .hero-surface-new {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-        
-        /* Success Badge */
-        .success-badge-new {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          color: #fff;
-          padding: 10px 18px;
-          border-radius: 50px;
-          font-size: 14px;
-          font-weight: 700;
-          box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-          width: fit-content;
-        }
-        .success-icon-new {
-          width: 22px;
-          height: 22px;
-          background: #fff;
-          color: #10b981;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: 800;
-        }
-        
-        /* Status Card */
-        .status-card-new {
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          border-radius: 16px;
-          padding: 20px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        .status-icon-wrap {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 12px;
-        }
-        .status-icon-bg {
-          width: 60px;
-          height: 60px;
-          background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
-          border-radius: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 32px;
-        }
-        .status-title-new {
-          text-align: center;
-          font-size: 18px;
-          font-weight: 800;
-          color: #1e293b;
-          margin: 0 0 6px 0;
-        }
-        .status-sub-new {
-          text-align: center;
-          font-size: 12px;
-          color: #10b981;
-          font-weight: 600;
-          margin: 0 0 14px 0;
-        }
-        
-        /* AI Banner */
-        .ai-banner-new {
-          background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-          padding: 12px 14px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          position: relative;
-          overflow: hidden;
-        }
-        .ai-pulse {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-          animation: aiPulse 2s ease-in-out infinite;
-        }
-        @keyframes aiPulse {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        .ai-icon-new {
-          font-size: 24px;
-          z-index: 1;
-        }
-        .ai-text-new {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-          z-index: 1;
-        }
-        .ai-title-new {
-          font-size: 13px;
-          font-weight: 700;
-          color: #fff;
-        }
-        .ai-sub-new {
-          font-size: 11px;
-          color: rgba(255,255,255,0.8);
-        }
-        
-        /* CTA Card */
-        .cta-card-new {
-          background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
-          border-radius: 14px;
-          padding: 16px;
-          text-align: center;
-          box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
-        }
-        .cta-badge-new {
-          display: inline-block;
-          background: rgba(255,255,255,0.9);
-          color: #ea580c;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: 0.5px;
-          margin-bottom: 8px;
-        }
-        .cta-text-new {
-          font-size: 14px;
-          color: #fff;
-          margin: 0;
-          line-height: 1.4;
-        }
-        .cta-text-new strong {
-          display: block;
-          font-size: 16px;
-          margin-top: 4px;
-        }
-        
-        /* Progress */
-        .progress-new {
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 14px;
-        }
-        .progress-header-new {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 8px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #64748b;
-        }
-        .progress-pct-new {
-          background: #10b981;
-          color: #fff;
-          padding: 3px 10px;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 700;
-        }
-        .progress-track-new {
-          height: 8px;
-          background: #e2e8f0;
-          border-radius: 10px;
-          overflow: hidden;
-          margin-bottom: 10px;
-        }
-        .progress-fill-new {
-          height: 100%;
-          background: linear-gradient(90deg, #10b981, #34d399);
-          border-radius: 10px;
-          transition: width 0.5s ease;
-        }
-        .progress-steps-new {
-          display: flex;
-          justify-content: center;
-          gap: 12px;
-        }
-        .pstep {
-          font-size: 11px;
-          font-weight: 600;
-          padding: 6px 12px;
-          border-radius: 8px;
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          color: #64748b;
-        }
-        .pstep.done {
-          background: #ecfdf5;
-          border-color: #a7f3d0;
-          color: #047857;
-        }
-        .pstep.current {
-          background: #fef3c7;
-          border-color: #fde047;
-          color: #a16207;
-        }
-        
-        /* Legacy styles */
-        .hero-progress { display: grid; gap: 8px; justify-items: center; color: white; }
-        .progress-bar-container { width: 100%; max-width: 620px; }
-        .progress-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; font-weight: 700; opacity: 0.95; }
-        .progress-label span:first-child { color: #0f172a; text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
-        .progress-percentage { font-size: 12px; font-weight: 800; color: #0f172a; background: white; padding: 4px 10px; border-radius: 20px; box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
-        .progress-bar-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.18); border-radius: 999px; overflow: hidden; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); position: relative; }
-        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #22c55e 0%, #34d399 100%); border-radius: 999px; box-shadow: 0 0 18px rgba(34, 197, 94, 0.8); }
-        .progress-steps { display: flex; justify-content: center; gap: 16px; font-size: 13px; opacity: 0.98; }
-        .step-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,0.85); color: #0f172a; box-shadow: 0 6px 14px rgba(0,0,0,0.12); font-weight: 700; }
-        .step-item .step-icon { font-size: 16px; }
-        .step-item.completed { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.25); }
-
-        .info-box {
-          background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
-          border: 2px solid #f39c12;
-          border-radius: 12px;
-          padding: 16px;
-          display: flex;
-          gap: 12px;
-          align-items: flex-start;
-        }
-        
-        /* Package Cards New */
-        .pkg-card-new {
-          transition: all 0.2s;
-        }
-        .pkg-card-new:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-        .pkg-badge {
-          display: inline-block;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 10px;
-          font-weight: 700;
-          background: #f1f5f9;
-          color: #64748b;
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
-        }
-        .pkg-badge.recommended {
-          background: linear-gradient(135deg, #10b981, #059669);
-          color: #fff;
-        }
-        .pkg-badge.premium {
-          background: linear-gradient(135deg, #f59e0b, #d97706);
-          color: #fff;
-        }
-        .pkg-price {
-          display: flex;
-          align-items: baseline;
-          gap: 2px;
-        }
-        .price-amount {
-          font-size: 20px;
-          font-weight: 800;
-          color: #1e293b;
-        }
-        .price-currency {
-          font-size: 12px;
-          font-weight: 600;
-          color: #64748b;
-        }
-        .pkg-features {
-          list-style: none;
-          padding: 0;
-          margin: 0 0 10px 0;
-          font-size: 11px;
-          color: #475569;
-        }
-        .pkg-features li {
-          display: flex;
-          align-items: flex-start;
-          gap: 6px;
-          padding: 3px 0;
-        }
-        .feat-check {
-          color: #10b981;
-          font-weight: 700;
-          flex-shrink: 0;
-        }
-        .more-features {
-          color: #94a3b8;
-          font-style: italic;
-          padding-left: 16px !important;
-        }
-        .add-to-cart-btn {
-          width: 100%;
-          padding: 10px;
-          border: none;
-          border-radius: 10px;
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-          color: #fff;
-          font-size: 12px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.2s;
-          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-        .add-to-cart-btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
-        }
-        .add-to-cart-btn.recommended {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        .add-to-cart-btn.recommended:hover {
-          box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-        }
-        .flow-arrow {
-          position: absolute;
-          top: 45%;
-          font-size: 42px;
-          color: rgba(16, 185, 129, 0.9);
-          text-shadow: 0 6px 16px rgba(16,185,129,0.4);
-          pointer-events: none;
-          animation: arrowPulse 1.4s ease-in-out infinite;
-          z-index: 10;
-        }
-        .flow-left { left: 33.33%; transform: translate(-50%, -50%); }
-        .flow-right { left: 66.66%; transform: translate(-50%, -50%); }
-        @keyframes arrowPulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-          50% { transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 };

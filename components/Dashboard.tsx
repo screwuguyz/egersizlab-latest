@@ -9,6 +9,7 @@ import VideoModal from './VideoModal';
 import ExerciseProgramModal from './ExerciseProgramModal';
 import ProgressModal from './ProgressModal';
 import AnimatedLogo from './AnimatedLogo';
+import { apiService } from '../services/apiService';
 
 interface CartItem {
   id: string;
@@ -55,6 +56,7 @@ const Dashboard: React.FC = () => {
   const [config, setConfig] = useState<DashboardConfig>(defaultConfig);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [showLoginSuccess, setShowLoginSuccess] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -343,6 +345,77 @@ const Dashboard: React.FC = () => {
     return () => clearTimeout(timer);
   }, [toast]);
 
+
+  // Login success message kontrolü
+  useEffect(() => {
+    const showSuccess = localStorage.getItem('showLoginSuccess');
+    if (showSuccess === 'true') {
+      setShowLoginSuccess(true);
+      localStorage.removeItem('showLoginSuccess');
+      // 3 saniye sonra otomatik kapat
+      const timer = setTimeout(() => {
+        setShowLoginSuccess(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Kullanıcı bilgilerini ve dashboard verilerini backend'den çek
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Kullanıcı bilgilerini getir
+        const response = await apiService.getCurrentUser();
+        if (response.success && (response as any).user) {
+          const user = (response as any).user;
+          const firstName = user.name?.split(' ')[0] || 'Kullanıcı';
+          const upperFirstName = firstName.toUpperCase();
+          
+          setConfig((prev) => ({
+            ...prev,
+            user_name: upperFirstName,
+          }));
+
+          if (user.packageType) {
+            setPackageType(user.packageType);
+            localStorage.setItem('packageType', user.packageType);
+          }
+        }
+
+        // Dashboard verilerini getir
+        const dashboardResponse = await apiService.getDashboardData();
+        if (dashboardResponse.success && dashboardResponse.data) {
+          const dashboardData = dashboardResponse.data;
+          
+          // Assessment sonuçlarını yükle
+          if (dashboardData.assessmentResults) {
+            console.log('Assessment sonuçları yüklendi:', dashboardData.assessmentResults);
+          }
+          
+          // Fotoğrafları yükle
+          if (dashboardData.photos) {
+            console.log('Fotoğraflar yüklendi:', dashboardData.photos);
+          }
+          
+          // Form verilerini yükle
+          if (dashboardData.formData) {
+            console.log('Form verileri yüklendi:', dashboardData.formData);
+          }
+          
+          // Bildirimleri yükle
+          if (dashboardData.notifications && Array.isArray(dashboardData.notifications)) {
+            setNotifications(dashboardData.notifications);
+          }
+        }
+      } catch (error) {
+        console.error('Kullanıcı verileri yüklenirken hata:', error);
+        // Hata durumunda varsayılan ismi kullan
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const gradientBackground = useMemo(
     () => `linear-gradient(135deg, ${config.background_color} 0%, ${config.accent_color} 100%)`,
     [config.background_color, config.accent_color]
@@ -427,7 +500,60 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-wrapper" style={{ minHeight: '100vh', background: gradientBackground }}>
+      {/* Login Success Message */}
+      {showLoginSuccess && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 20,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10000,
+            background: '#10b981',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            animation: 'fadeIn 0.3s ease-in',
+          }}
+        >
+          <svg style={{ width: 20, height: 20 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span style={{ fontWeight: 600, fontSize: 14 }}>Giriş yapıldı</span>
+          <button
+            onClick={() => setShowLoginSuccess(false)}
+            style={{
+              marginLeft: 8,
+              background: 'transparent',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: 18,
+              lineHeight: 1,
+              padding: 0,
+              width: 20,
+              height: 20,
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
       <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+        }
         body { margin: 0; padding: 0; box-sizing: border-box; }
         * { box-sizing: inherit; }
         .dashboard-wrapper { display: flex; height: 100%; width: 100%; position: relative; }

@@ -124,6 +124,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onOpenRegis
                   const response = await apiService.login(formData.email, formData.password);
 
                   if (response.success) {
+                    // Success flag'i localStorage'a kaydet
+                    localStorage.setItem('showLoginSuccess', 'true');
                     onClose();
                     if (onSuccess) {
                       onSuccess();
@@ -132,10 +134,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onOpenRegis
                       window.location.href = '/#dashboard';
                     }
                   } else {
-                    setError(response.error || 'Giriş başarısız. E-posta veya şifrenizi kontrol edin.');
+                    // Backend'den gelen spesifik hata mesajını göster
+                    setError(response.error || 'Giriş başarısız. Lütfen tekrar deneyin.');
                   }
                 } catch (err: any) {
-                  setError(err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+                  // API hatası durumunda backend'den gelen mesajı göster
+                  const errorMessage = err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+                  setError(errorMessage);
                 } finally {
                   setLoading(false);
                 }
