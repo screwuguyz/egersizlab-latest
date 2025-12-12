@@ -142,9 +142,10 @@ interface AssessmentWizardProps {
   open: boolean;
   onClose: () => void;
   onComplete?: () => void;
+  clinicalTestType?: string | null; // Hangi klinik test açıldı: 'muscle-strength', 'flexibility', 'range-of-motion', 'posture', 'functional'
 }
 
-const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onComplete }) => {
+const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onComplete, clinicalTestType }) => {
   const [step, setStep] = useState<StepKey>(1);
   const [gender, setGender] = useState<string | null>(null);
   const [age, setAge] = useState<number | null>(null);
@@ -305,11 +306,57 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
     }
   };
 
-  const goNext = () => {
+  const goNext = async () => {
     if (!validateStep(step)) return;
     if (step < 5) {
       setStep((s) => (s + 1) as StepKey);
     } else {
+      // Son adımda verileri kaydet
+      try {
+        const { apiService } = await import('../services/apiService');
+        
+        // Form verilerini topla
+        const formData = {
+          gender,
+          age,
+          height,
+          weight,
+          workType,
+          chronicConditions,
+          medications,
+          selectedAreas,
+          painDuration,
+          painIntensity,
+          selectedPainTypes,
+          safetyAnswers,
+          manualArea,
+        };
+
+        // Fotoğrafları kaydet - Developer için tam base64 verisi
+        const photoData = {
+          front: photos.front || null,
+          side: photos.side || null,
+          back: photos.back || null,
+        };
+
+        // Assessment sonuçlarını topla
+        const assessmentResults = {
+          formData,
+          photos: photoData,
+          completedAt: new Date().toISOString(),
+        };
+
+        // Dashboard verilerini kaydet - Fotoğraflar dahil
+        await apiService.saveDashboardData({
+          assessmentResults,
+          photos: photoData, // Tam base64 verisi
+          formData,
+        });
+      } catch (error) {
+        console.error('Dashboard verileri kaydedilirken hata:', error);
+        // Hata olsa bile devam et
+      }
+
       if (onComplete) onComplete();
       onClose();
     }
@@ -325,21 +372,21 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
       aria-modal="true"
       role="dialog"
     >
-      <div className="assessment-modal bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+      <div className="assessment-modal bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[98vh] overflow-hidden flex flex-col">
+        <div className="p-8 border-b border-gray-100 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-                <span className="text-white text-lg">🏥</span>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                <span className="text-white text-3xl">🏥</span>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Vücut Analizi</h2>
-                <p className="text-gray-500 text-sm">Kişiselleştirilmiş program için bilgi topluyoruz</p>
+                <h2 className="text-4xl font-bold text-gray-900">Vücut Analizi</h2>
+                <p className="text-gray-500 text-xl mt-1">Kişiselleştirilmiş program için bilgi topluyoruz</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center transition"
+              className="w-10 h-10 rounded-full bg-gray-100 hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center transition text-2xl"
               aria-label="Kapat"
             >
               ×
@@ -348,14 +395,14 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           <div className="mt-4 flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((s) => (
               <div key={s} className="flex-1 flex items-center gap-1">
-                <div className={`h-1.5 flex-1 rounded-full transition-all ${s <= step ? 'bg-emerald-500' : 'bg-gray-200'}`} />
+                <div className={`h-2 flex-1 rounded-full transition-all ${s <= step ? 'bg-emerald-500' : 'bg-gray-200'}`} />
               </div>
             ))}
-            <span className="text-sm font-semibold text-gray-500 ml-2">{step}/5</span>
+            <span className="text-xl font-semibold text-gray-500 ml-2">{step}/5</span>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-hidden p-8">
           {step === 1 && (
             <div className="step1-compact">
               <div className="section-header-compact">
@@ -605,7 +652,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           )}
         </div>
 
-        <div className="p-4 bg-gray-50/80 border-t border-gray-100 flex items-center gap-3">
+        <div className="p-8 bg-gray-50/80 border-t border-gray-100 flex items-center gap-4">
           <button
             onClick={goBack}
             disabled={step === 1}
@@ -626,21 +673,28 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         .assessment-modal {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+        /* Global font size increase for readability */
+        .assessment-modal * {
+          font-size: inherit;
+        }
+        .assessment-modal {
+          font-size: 18px;
+        }
         
         /* Section Header */
         .section-header {
           margin-bottom: 4px;
         }
         .section-header h3 {
-          font-size: 18px;
+          font-size: 24px;
           font-weight: 700;
           color: #1e293b;
           margin: 0;
         }
         .section-header p {
-          font-size: 13px;
+          font-size: 18px;
           color: #64748b;
-          margin: 4px 0 0 0;
+          margin: 6px 0 0 0;
         }
         
         /* Compact Step 1 */
@@ -663,12 +717,12 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         .gender-btn {
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 12px 18px;
-          border-radius: 10px;
+          gap: 12px;
+          padding: 16px 24px;
+          border-radius: 12px;
           border: 2px solid #e2e8f0;
           background: #fff;
-          font-size: 16px;
+          font-size: 20px;
           font-weight: 600;
           color: #475569;
           cursor: pointer;
@@ -690,16 +744,16 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 4px;
         }
         .meas-label {
-          font-size: 13px;
+          font-size: 20px;
           font-weight: 700;
           color: #64748b;
           text-transform: uppercase;
         }
         .meas-item input {
-          padding: 12px;
+          padding: 20px;
           border: 2px solid #e2e8f0;
-          border-radius: 8px;
-          font-size: 18px;
+          border-radius: 12px;
+          font-size: 26px;
           font-weight: 600;
           color: #1e293b;
           background: #f8fafc;
@@ -711,9 +765,9 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           background: #fff;
         }
         .meas-unit {
-          font-size: 12px;
+          font-size: 18px;
           color: #94a3b8;
-          margin-top: 2px;
+          margin-top: 4px;
         }
         .work-compact {
           display: flex;
@@ -729,12 +783,12 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 6px;
-          padding: 12px 10px;
-          border-radius: 10px;
+          gap: 10px;
+          padding: 20px 16px;
+          border-radius: 12px;
           border: 2px solid #e2e8f0;
           background: #fff;
-          font-size: 14px;
+          font-size: 22px;
           font-weight: 600;
           color: #475569;
           cursor: pointer;
@@ -758,24 +812,24 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 4px;
         }
         .opt-field label {
-          font-size: 14px;
+          font-size: 22px;
           font-weight: 500;
           color: #475569;
         }
         .opt-tag {
-          font-size: 11px;
+          font-size: 16px;
           font-weight: 600;
           color: #94a3b8;
           background: #f1f5f9;
-          padding: 3px 6px;
-          border-radius: 4px;
-          margin-left: 4px;
+          padding: 6px 10px;
+          border-radius: 6px;
+          margin-left: 6px;
         }
         .opt-field textarea {
           border: 2px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 10px 12px;
-          font-size: 15px;
+          border-radius: 12px;
+          padding: 18px 20px;
+          font-size: 20px;
           color: #334155;
           background: #f8fafc;
           resize: none;
@@ -807,10 +861,10 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
         }
         .gender-icon {
-          font-size: 24px;
+          font-size: 32px;
         }
         .gender-label {
-          font-size: 15px;
+          font-size: 20px;
           font-weight: 600;
           color: #334155;
         }
@@ -830,7 +884,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 6px;
         }
         .measure-field label {
-          font-size: 12px;
+          font-size: 18px;
           font-weight: 600;
           color: #64748b;
           text-transform: uppercase;
@@ -841,7 +895,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           align-items: center;
           background: #f8fafc;
           border: 2px solid #e2e8f0;
-          border-radius: 10px;
+          border-radius: 12px;
           overflow: hidden;
           transition: all 0.2s;
         }
@@ -853,8 +907,8 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           flex: 1;
           border: none;
           background: transparent;
-          padding: 12px;
-          font-size: 16px;
+          padding: 16px;
+          font-size: 22px;
           font-weight: 600;
           color: #1e293b;
           width: 100%;
@@ -864,8 +918,8 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           color: #cbd5e1;
         }
         .measure-input-wrap .unit {
-          padding: 0 12px;
-          font-size: 13px;
+          padding: 0 16px;
+          font-size: 18px;
           color: #94a3b8;
           font-weight: 500;
           background: #f1f5f9;
@@ -878,7 +932,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 10px;
         }
         .field-label {
-          font-size: 12px;
+          font-size: 18px;
           font-weight: 600;
           color: #64748b;
           text-transform: uppercase;
@@ -887,15 +941,15 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         .work-options {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
+          gap: 14px;
         }
         .work-card {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 6px;
-          padding: 14px 10px;
-          border-radius: 12px;
+          gap: 8px;
+          padding: 18px 14px;
+          border-radius: 14px;
           border: 2px solid #e2e8f0;
           background: #fff;
           cursor: pointer;
@@ -910,14 +964,14 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
         }
         .work-icon {
-          font-size: 22px;
+          font-size: 32px;
         }
         .work-label {
-          font-size: 11px;
+          font-size: 18px;
           font-weight: 600;
           color: #475569;
           text-align: center;
-          line-height: 1.3;
+          line-height: 1.4;
         }
         .work-card.selected .work-label {
           color: #047857;
@@ -937,27 +991,27 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 6px;
         }
         .optional-field label {
-          font-size: 13px;
+          font-size: 18px;
           font-weight: 500;
           color: #475569;
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
         }
         .optional-tag {
-          font-size: 10px;
+          font-size: 14px;
           font-weight: 600;
           color: #94a3b8;
           background: #f1f5f9;
-          padding: 2px 6px;
-          border-radius: 4px;
+          padding: 4px 8px;
+          border-radius: 6px;
           text-transform: uppercase;
         }
         .optional-field textarea {
           border: 2px solid #e2e8f0;
-          border-radius: 10px;
-          padding: 10px 12px;
-          font-size: 14px;
+          border-radius: 12px;
+          padding: 14px 16px;
+          font-size: 18px;
           color: #334155;
           background: #f8fafc;
           resize: none;
@@ -974,11 +1028,11 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         
         /* Navigation Buttons */
         .back-btn {
-          padding: 12px 20px;
-          border-radius: 10px;
+          padding: 18px 28px;
+          border-radius: 12px;
           border: 2px solid #e2e8f0;
           background: #fff;
-          font-size: 14px;
+          font-size: 20px;
           font-weight: 600;
           color: #64748b;
           cursor: pointer;
@@ -994,11 +1048,11 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         }
         .next-btn {
           flex: 1;
-          padding: 14px 24px;
-          border-radius: 10px;
+          padding: 18px 32px;
+          border-radius: 12px;
           border: none;
           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          font-size: 15px;
+          font-size: 20px;
           font-weight: 700;
           color: #fff;
           cursor: pointer;
@@ -1014,11 +1068,12 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         .wizard-option-btn {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 12px 14px;
-          border-radius: 10px;
+          gap: 12px;
+          padding: 18px 20px;
+          border-radius: 12px;
           border: 2px solid #e2e8f0;
           background: #fff;
+          font-size: 20px;
           font-weight: 600;
           color: #374151;
           transition: all 0.2s;
@@ -1033,16 +1088,16 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         .wizard-field {
           display: flex;
           flex-direction: column;
-          gap: 6px;
-          font-size: 14px;
+          gap: 8px;
+          font-size: 18px;
           color: #4b5563;
         }
         .wizard-field input,
         .wizard-field textarea {
           border: 2px solid #e2e8f0;
-          border-radius: 10px;
-          padding: 10px 12px;
-          font-size: 16px;
+          border-radius: 12px;
+          padding: 16px 18px;
+          font-size: 20px;
           transition: border-color 0.2s;
         }
         .wizard-field input:focus,
@@ -1061,15 +1116,15 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           margin-bottom: 0;
         }
         .section-header-compact h3 {
-          font-size: 22px;
+          font-size: 28px;
           font-weight: 700;
           color: #1e293b;
           margin: 0;
         }
         .section-header-compact p {
-          font-size: 16px;
+          font-size: 20px;
           color: #64748b;
-          margin: 4px 0 0 0;
+          margin: 6px 0 0 0;
         }
         .body-diagrams-compact {
           display: grid;
@@ -1095,18 +1150,18 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           align-items: center;
         }
         .empty-hint-sm {
-          font-size: 12px;
+          font-size: 18px;
           color: #94a3b8;
         }
         .area-tag-sm {
           display: inline-flex;
           align-items: center;
-          gap: 4px;
-          padding: 4px 8px;
+          gap: 6px;
+          padding: 8px 12px;
           background: #ecfdf5;
           border: 1px solid #a7f3d0;
-          border-radius: 12px;
-          font-size: 11px;
+          border-radius: 14px;
+          font-size: 18px;
           font-weight: 600;
           color: #047857;
         }
@@ -1114,7 +1169,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           background: none;
           border: none;
           color: #059669;
-          font-size: 12px;
+          font-size: 18px;
           cursor: pointer;
           padding: 0;
           line-height: 1;
@@ -1124,24 +1179,24 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 6px;
         }
         .manual-input-sm {
-          width: 140px;
-          padding: 8px 10px;
+          width: 200px;
+          padding: 14px 16px;
           border: 2px solid #e2e8f0;
-          border-radius: 8px;
-          font-size: 12px;
+          border-radius: 12px;
+          font-size: 18px;
         }
         .manual-input-sm:focus {
           outline: none;
           border-color: #10b981;
         }
         .manual-add-btn-sm {
-          width: 36px;
-          height: 36px;
+          width: 50px;
+          height: 50px;
           border: none;
-          border-radius: 8px;
+          border-radius: 12px;
           background: #10b981;
           color: #fff;
-          font-size: 18px;
+          font-size: 24px;
           font-weight: 700;
           cursor: pointer;
         }
@@ -1168,10 +1223,10 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         }
         .body-view-icon {
-          font-size: 14px;
+          font-size: 20px;
         }
         .body-view-title {
-          font-size: 11px;
+          font-size: 18px;
           font-weight: 700;
           color: #fff;
           letter-spacing: 0.5px;
@@ -1231,7 +1286,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         }
         .pain-check {
           fill: #fff;
-          font-size: 10px;
+          font-size: 16px;
           font-weight: 700;
           pointer-events: none;
         }
@@ -1253,7 +1308,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           padding: 16px;
         }
         .body-diagram-title {
-          font-size: 12px;
+          font-size: 20px;
           font-weight: 700;
           letter-spacing: 0.5px;
           color: #6b7280;
@@ -1321,14 +1376,15 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           padding: 14px;
         }
         .safety-btn {
-          padding: 10px 18px;
-          border-radius: 10px;
+          padding: 16px 24px;
+          border-radius: 12px;
           border: 2px solid #e5e7eb;
           background: #fff;
+          font-size: 20px;
           font-weight: 700;
           color: #374151;
           transition: all 0.2s;
-          min-width: 90px;
+          min-width: 120px;
         }
         .safety-btn.active-yes {
           border-color: #22c55e;
@@ -1367,23 +1423,23 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           border: 1px dashed #e2e8f0;
         }
         .empty-hint {
-          font-size: 13px;
+          font-size: 18px;
           color: #94a3b8;
         }
         .selected-areas {
           display: flex;
           flex-wrap: wrap;
-          gap: 8px;
+          gap: 10px;
         }
         .area-tag {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          padding: 6px 10px;
+          gap: 8px;
+          padding: 10px 14px;
           background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
           border: 1px solid #a7f3d0;
-          border-radius: 20px;
-          font-size: 12px;
+          border-radius: 24px;
+          font-size: 18px;
           font-weight: 600;
           color: #047857;
         }
@@ -1391,7 +1447,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           background: none;
           border: none;
           color: #059669;
-          font-size: 14px;
+          font-size: 20px;
           cursor: pointer;
           padding: 0;
           line-height: 1;
@@ -1406,10 +1462,10 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         }
         .manual-input {
           flex: 1;
-          padding: 10px 14px;
+          padding: 16px 20px;
           border: 2px solid #e2e8f0;
-          border-radius: 10px;
-          font-size: 14px;
+          border-radius: 12px;
+          font-size: 20px;
           color: #334155;
           background: #f8fafc;
           transition: all 0.2s;
@@ -1423,12 +1479,12 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           color: #94a3b8;
         }
         .manual-add-btn {
-          padding: 10px 18px;
+          padding: 16px 24px;
           border: none;
-          border-radius: 10px;
+          border-radius: 12px;
           background: #10b981;
           color: #fff;
-          font-size: 14px;
+          font-size: 20px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s;
@@ -1449,7 +1505,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 16px;
         }
         .field-label-sm {
-          font-size: 15px;
+          font-size: 20px;
           font-weight: 700;
           color: #64748b;
           text-transform: uppercase;
@@ -1518,12 +1574,12 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           flex-direction: column;
         }
         .dur-title {
-          font-size: 13px;
+          font-size: 20px;
           font-weight: 700;
           color: #1e293b;
         }
         .dur-sub {
-          font-size: 10px;
+          font-size: 16px;
           color: #64748b;
         }
         .dur-check {
@@ -1568,7 +1624,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
         .int-labels {
           display: flex;
           justify-content: space-between;
-          font-size: 10px;
+          font-size: 16px;
           font-weight: 600;
           color: #94a3b8;
           text-transform: uppercase;
@@ -1804,12 +1860,12 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 6px;
-          padding: 12px;
-          border-radius: 10px;
+          gap: 8px;
+          padding: 16px;
+          border-radius: 12px;
           border: 2px solid #e2e8f0;
           background: #fff;
-          font-size: 13px;
+          font-size: 20px;
           font-weight: 600;
           color: #475569;
           cursor: pointer;
@@ -1878,29 +1934,29 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           min-width: 0;
         }
         .safety-q {
-          font-size: 13px;
+          font-size: 20px;
           font-weight: 600;
           color: #1e293b;
           display: block;
-          line-height: 1.3;
+          line-height: 1.4;
         }
         .safety-h {
-          font-size: 10px;
+          font-size: 16px;
           color: #64748b;
           display: block;
-          margin-top: 2px;
+          margin-top: 4px;
         }
         .safety-btns {
           display: flex;
-          gap: 6px;
+          gap: 8px;
           flex-shrink: 0;
         }
         .saf-btn {
-          padding: 8px 14px;
-          border-radius: 8px;
+          padding: 14px 20px;
+          border-radius: 10px;
           border: 2px solid #e2e8f0;
           background: #fff;
-          font-size: 12px;
+          font-size: 18px;
           font-weight: 600;
           color: #64748b;
           cursor: pointer;
@@ -1956,11 +2012,11 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 2px;
         }
         .safety-info-text strong {
-          font-size: 14px;
+          font-size: 20px;
           color: #047857;
         }
         .safety-info-text span {
-          font-size: 12px;
+          font-size: 18px;
           color: #059669;
         }
         .safety-questions-list {
@@ -1982,12 +2038,12 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           border-color: #cbd5e1;
         }
         .safety-question-number {
-          width: 28px;
-          height: 28px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
           background: #e2e8f0;
           color: #64748b;
-          font-size: 12px;
+          font-size: 20px;
           font-weight: 700;
           display: flex;
           align-items: center;
@@ -1995,7 +2051,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           flex-shrink: 0;
         }
         .safety-question-icon {
-          font-size: 24px;
+          font-size: 32px;
           flex-shrink: 0;
         }
         .safety-question-content {
@@ -2003,15 +2059,15 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           min-width: 0;
         }
         .safety-question-text {
-          font-size: 14px;
+          font-size: 20px;
           font-weight: 600;
           color: #1e293b;
-          line-height: 1.4;
+          line-height: 1.5;
         }
         .safety-question-helper {
-          font-size: 11px;
+          font-size: 18px;
           color: #64748b;
-          margin-top: 4px;
+          margin-top: 6px;
         }
         .safety-answer-buttons {
           display: flex;
@@ -2022,20 +2078,20 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 2px;
-          padding: 10px 16px;
-          border-radius: 10px;
+          gap: 4px;
+          padding: 16px 22px;
+          border-radius: 12px;
           border: 2px solid #e2e8f0;
           background: #fff;
-          font-size: 12px;
+          font-size: 20px;
           font-weight: 600;
           color: #64748b;
           cursor: pointer;
           transition: all 0.2s;
-          min-width: 70px;
+          min-width: 100px;
         }
         .safety-answer-btn .btn-icon {
-          font-size: 14px;
+          font-size: 24px;
         }
         .safety-answer-btn.no:hover {
           border-color: #10b981;
@@ -2165,20 +2221,28 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           justify-content: center;
         }
         .photo-label {
-          padding: 8px;
+          padding: 12px;
           background: #fff;
           text-align: center;
-          font-size: 12px;
+          font-size: 18px;
           font-weight: 600;
           color: #1e293b;
         }
         .photo-note-compact {
-          text-align: center;
-          font-size: 11px;
+          font-size: 20px;
           color: #64748b;
-          padding: 8px;
+          text-align: center;
+          padding: 16px;
           background: #f1f5f9;
-          border-radius: 8px;
+          border-radius: 12px;
+        }
+        .photo-note-compact-old {
+          text-align: center;
+          font-size: 18px;
+          color: #64748b;
+          padding: 12px;
+          background: #f1f5f9;
+          border-radius: 10px;
         }
         
         /* Legacy Step 5 styles */
@@ -2216,11 +2280,11 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           gap: 2px;
         }
         .info-card-content strong {
-          font-size: 12px;
+          font-size: 18px;
           color: #1e293b;
         }
         .info-card-content span {
-          font-size: 11px;
+          font-size: 16px;
           color: #64748b;
         }
         .photo-upload-grid {
@@ -2268,7 +2332,7 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           font-size: 24px;
         }
         .photo-upload-text {
-          font-size: 12px;
+          font-size: 18px;
           font-weight: 600;
           color: #64748b;
         }
@@ -2323,14 +2387,14 @@ const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ open, onClose, onCo
           text-align: center;
         }
         .photo-card-title {
-          font-size: 13px;
+          font-size: 22px;
           font-weight: 700;
           color: #1e293b;
         }
         .photo-card-hint {
-          font-size: 11px;
+          font-size: 18px;
           color: #64748b;
-          margin-top: 2px;
+          margin-top: 4px;
         }
         .photo-skip-note {
           display: flex;

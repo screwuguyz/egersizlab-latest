@@ -284,8 +284,12 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ onClose, onSucces
             if (onSuccess) {
               onSuccess();
             } else {
-              // Dashboard'a yönlendir
-              window.location.href = '/#dashboard';
+              // Dashboard'a yönlendir - hash routing kullan
+              window.location.hash = '#dashboard';
+              // Router'ın hash'i algılaması için kısa bir gecikme sonrası reload
+              setTimeout(() => {
+                window.location.reload();
+              }, 100);
             }
           }}
         />

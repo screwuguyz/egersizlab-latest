@@ -124,18 +124,27 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onOpenRegis
                   const response = await apiService.login(formData.email, formData.password);
 
                   if (response.success) {
+                    // Success flag'i localStorage'a kaydet
+                    localStorage.setItem('showLoginSuccess', 'true');
                     onClose();
                     if (onSuccess) {
                       onSuccess();
                     } else {
-                      // Dashboard'a yönlendir
-                      window.location.href = '/#dashboard';
+                      // Dashboard'a yönlendir - hash routing kullan
+                      window.location.hash = '#dashboard';
+                      // Router'ın hash'i algılaması için kısa bir gecikme sonrası reload
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 100);
                     }
                   } else {
-                    setError(response.error || 'Giriş başarısız. E-posta veya şifrenizi kontrol edin.');
+                    // Backend'den gelen spesifik hata mesajını göster
+                    setError(response.error || 'Giriş başarısız. Lütfen tekrar deneyin.');
                   }
                 } catch (err: any) {
-                  setError(err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+                  // API hatası durumunda backend'den gelen mesajı göster
+                  const errorMessage = err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+                  setError(errorMessage);
                 } finally {
                   setLoading(false);
                 }

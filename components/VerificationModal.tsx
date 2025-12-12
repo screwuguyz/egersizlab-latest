@@ -78,8 +78,12 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
       const response = await apiService.verifyAndRegister(email, fullCode, password, name, phone);
 
       if (response.success) {
+        // Success flag'i localStorage'a kaydet
+        localStorage.setItem('showLoginSuccess', 'true');
         onSuccess();
         onClose();
+        // Dashboard'a yönlendir
+        window.location.href = '/#dashboard';
       } else {
         setError(response.error || 'Kod doğrulanamadı. Lütfen tekrar deneyin.');
         // Hata durumunda kodları temizle

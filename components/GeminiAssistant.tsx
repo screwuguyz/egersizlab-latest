@@ -1,13 +1,40 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, X, Bot, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, X, Bot, Loader2, RotateCcw, Trash2 } from 'lucide-react';
 import { getGeminiResponse } from '../services/geminiService';
 import { ChatMessage } from '../types';
 
+const STORAGE_KEY = 'egersizlab_chat_messages';
+const DELETED_STORAGE_KEY = 'egersizlab_deleted_messages';
+
 const GeminiAssistant: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const defaultMessage: ChatMessage[] = [
     { role: 'model', text: "Merhaba! Ben EgzersizLab asistanıyım. Size hangi konuda yardımcı olabilirim? Kurs önerisi ister misiniz?" }
-  ]);
+  ];
+
+  // localStorage'dan mesajları yükle
+  const loadMessages = (): ChatMessage[] => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.length > 0 ? parsed : defaultMessage;
+      }
+    } catch (error) {
+      console.error('Mesajlar yüklenirken hata:', error);
+    }
+    return defaultMessage;
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>(loadMessages);
+  const [deletedMessages, setDeletedMessages] = useState<ChatMessage[]>(() => {
+    try {
+      const saved = localStorage.getItem(DELETED_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -15,6 +42,24 @@ const GeminiAssistant: React.FC = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Mesajları localStorage'a kaydet
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch (error) {
+      console.error('Mesajlar kaydedilirken hata:', error);
+    }
+  }, [messages]);
+
+  // Silinen mesajları localStorage'a kaydet
+  useEffect(() => {
+    try {
+      localStorage.setItem(DELETED_STORAGE_KEY, JSON.stringify(deletedMessages));
+    } catch (error) {
+      console.error('Silinen mesajlar kaydedilirken hata:', error);
+    }
+  }, [deletedMessages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -38,6 +83,29 @@ const GeminiAssistant: React.FC = () => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleClearChat = () => {
+    if (window.confirm('Tüm konuşmayı silmek istediğinize emin misiniz?')) {
+      // Mevcut mesajları silinenlere ekle
+      setDeletedMessages(prev => [...prev, ...messages]);
+      // Mesajları varsayılan mesajla sıfırla
+      setMessages(defaultMessage);
+    }
+  };
+
+  const handleRestoreConversation = () => {
+    if (deletedMessages.length === 0) {
+      alert('Geri getirilecek konuşma bulunamadı.');
+      return;
+    }
+    
+    if (window.confirm('Son silinen konuşmayı geri getirmek istediğinize emin misiniz?')) {
+      // Son silinen mesajları geri getir
+      setMessages(prev => [...deletedMessages, ...prev]);
+      // Silinen mesajları temizle
+      setDeletedMessages([]);
     }
   };
 
@@ -65,12 +133,32 @@ const GeminiAssistant: React.FC = () => {
                 <p className="text-xs text-blue-200">Gemini AI tarafından desteklenmektedir</p>
               </div>
             </div>
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white hover:bg-white/10 p-1 rounded transition"
-            >
-              <X size={20} />
-            </button>
+            <div className="flex items-center gap-2">
+              {deletedMessages.length > 0 && (
+                <button
+                  onClick={handleRestoreConversation}
+                  className="text-white/80 hover:text-white hover:bg-white/10 p-1.5 rounded transition"
+                  title="Silinen konuşmayı geri getir"
+                >
+                  <RotateCcw size={18} />
+                </button>
+              )}
+              {messages.length > 1 && (
+                <button
+                  onClick={handleClearChat}
+                  className="text-white/80 hover:text-white hover:bg-white/10 p-1.5 rounded transition"
+                  title="Konuşmayı temizle"
+                >
+                  <Trash2 size={18} />
+                </button>
+              )}
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="text-white/80 hover:text-white hover:bg-white/10 p-1 rounded transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
