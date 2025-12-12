@@ -27,7 +27,7 @@ const testConfigs = {
         description: 'Ayaklar omuz genişliğinde, eller önde, yavaşça çömelin ve kalkın',
         duration: '30 saniye',
         videoTips: 'Yan profilden çekin, diz ve kalça hareketini görebilmeli',
-        relevantBodyAreas: ['knee-front-left', 'knee-front-right', 'knee-back-left', 'knee-back-right', 'hip-front', 'hip-back', 'lower-back', 'thigh-front-left', 'thigh-front-right', 'thigh-back-left', 'thigh-back-right'],
+        relevantBodyAreas: ['knee-front-left', 'knee-front-right', 'knee-back-left', 'knee-back-right', 'hip-front', 'hip-back', 'lower-back', 'thigh-front-left', 'thigh-front-right', 'thigh-back-left', 'thigh-back-right', 'ankle-front-left', 'ankle-front-right', 'ankle-back-left', 'ankle-back-right', 'calf-back-left', 'calf-back-right'],
         instructions: [
           'Kamerayı yan profilden konumlandırın',
           'Rahat kıyafetler giyin, hareketi engellemesin',
@@ -95,79 +95,40 @@ const testConfigs = {
         ],
       },
       {
-        id: 'single-leg',
-        name: 'Tek Ayak Duruş',
-        description: 'Bir ayağınızı kaldırın, 10 saniye dengede durun',
-        duration: '10 saniye',
-        videoTips: 'Önden çekin, dengeyi görebilmeli',
-        relevantBodyAreas: ['ankle-front-left', 'ankle-front-right', 'knee-front-left', 'knee-front-right', 'hip-front', 'hip-back', 'lower-back'],
-        instructions: [
-          'Kamerayı önden konumlandırın',
-          'Rahat kıyafetler giyin, hareketi engellemesin',
-          'Testi yaparken ağrı olursa durun',
-          'Hareketi 10 saniye boyunca yapabildiğiniz kadar yapın',
-        ],
-        evaluationPoints: [
-          '10 saniye durabildi mi?',
-          'Vücut sallanıyor mu?',
-          'Diğer ayak yere değiyor mu?',
-        ],
-      },
-      {
-        id: 'wall-pushup',
-        name: 'Duvarda Şınav',
-        description: 'Duvara yaslanın, 5 kez şınav yapın',
+        id: 'calf-raise',
+        name: 'Topuk Yükseltme (Calf Raise)',
+        description: 'Tek ayak üzerinde durun, bir yerden destek alarak 30 saniye boyunca parmak ucuna yükselip inin',
         duration: '30 saniye',
-        videoTips: 'Yandan çekin, omuz ve dirsek hareketini görebilmeli',
-        relevantBodyAreas: ['shoulder-front-left', 'shoulder-front-right', 'shoulder-back-left', 'shoulder-back-right', 'elbow-front-left', 'elbow-front-right', 'elbow-back-left', 'elbow-back-right', 'wrist-front-left', 'wrist-front-right', 'chest', 'upper-back', 'neck-front', 'neck-back', 'head-front', 'head-back'],
+        videoTips: 'Yandan çekin, topuk yükselme hareketini görebilmeli',
+        relevantBodyAreas: ['ankle-front-left', 'ankle-front-right', 'ankle-back-left', 'ankle-back-right', 'calf-back-left', 'calf-back-right', 'lower-back', 'mid-back', 'upper-back', 'hip-front', 'hip-back', 'knee-front-left', 'knee-front-right', 'knee-back-left', 'knee-back-right'],
         instructions: [
           'Kamerayı yandan konumlandırın',
           'Rahat kıyafetler giyin, hareketi engellemesin',
           'Testi yaparken ağrı olursa durun',
-          'Hareketi 30 saniye boyunca yapabildiğiniz kadar yapın',
+          'Tek ayak üzerinde durun, bir yerden destek alarak 30 saniye boyunca parmak ucuna yükselip inin',
         ],
         evaluationPoints: [
-          'Tam hareket yapabiliyor mu?',
-          'Omuzlar düşüyor mu?',
-          'Gövde düz kalıyor mu?',
+          'Topuk tam kalkıyor mu?',
+          'Yorulunca titreme başlıyor mu?',
         ],
       },
       {
-        id: 'bridge',
-        name: 'Köprü (Bridge)',
-        description: 'Sırt üstü yatın, kalçaları kaldırın ve 5 saniye tutun',
-        duration: '15 saniye',
-        videoTips: 'Yandan çekin, kalça yüksekliğini görebilmeli',
-        relevantBodyAreas: ['lower-back', 'mid-back', 'hip-front', 'hip-back', 'thigh-front-left', 'thigh-front-right'],
-        instructions: [
-          'Kamerayı yandan konumlandırın',
-          'Rahat kıyafetler giyin, hareketi engellemesin',
-          'Testi yaparken ağrı olursa durun',
-          'Hareketi 15 saniye boyunca yapabildiğiniz kadar yapın',
-        ],
-        evaluationPoints: [
-          'Kalça yeterince yüksek mi?',
-          'Bel ağrısı var mı?',
-          '5 saniye tutabildi mi?',
-        ],
-      },
-      {
-        id: 'plank',
-        name: 'Plank (Düz Duruş)',
-        description: 'Dirsekler üzerinde, vücut düz, 20 saniye tutun',
+        id: 'heel-walk',
+        name: 'Topuk Üzerinde Yürüyüş (Heel Walk)',
+        description: 'Ayakkabılarını çıkar. Olduğun yerde veya odada ileri geri giderek, parmak uçlarını havaya kaldır ve sadece topukların üzerinde yürü',
         duration: '20 saniye',
-        videoTips: 'Yandan çekin, vücut düz çizgisi görünmeli',
-        relevantBodyAreas: ['lower-back', 'mid-back', 'upper-back', 'shoulder-front-left', 'shoulder-front-right', 'elbow-front-left', 'elbow-front-right', 'abdomen'],
+        videoTips: 'Önden veya yandan çekin, ayak pozisyonunu ve parmak yüksekliğini görebilmeli',
+        relevantBodyAreas: ['ankle-front-left', 'ankle-front-right', 'ankle-back-left', 'ankle-back-right', 'calf-back-left', 'calf-back-right', 'lower-back', 'hip-front', 'hip-back', 'knee-front-left', 'knee-front-right', 'knee-back-left', 'knee-back-right'],
         instructions: [
-          'Kamerayı yandan konumlandırın',
+          'Kamerayı önden veya yandan konumlandırın',
+          'Ayakkabılarını çıkar',
           'Rahat kıyafetler giyin, hareketi engellemesin',
           'Testi yaparken ağrı olursa durun',
-          'Hareketi 20 saniye boyunca yapabildiğiniz kadar yapın',
+          'Olduğun yerde veya odada ileri geri giderek, parmak uçlarını havaya kaldır ve sadece topukların üzerinde yürü (20 saniye)',
         ],
         evaluationPoints: [
-          'Vücut düz mü?',
-          'Kalça yukarı/aşağı mı?',
-          '20 saniye tutabildi mi?',
+          'Parmak yüksekliği: Ayak ucunu yerden ne kadar kesebiliyor? (Düşükse "Düşük Ayak" riski veya ön kas zayıflığı)',
+          'Ağrı ifadesi: Bunu yaparken kaval kemiği önünde ağrı oluyor mu? (Shin Splints şüphesi)',
         ],
       },
     ],
@@ -287,6 +248,19 @@ const ClinicalTestModal: React.FC<ClinicalTestModalProps> = ({ isOpen, onClose, 
       return baseConfig.tests;
     }
     
+    // Ön/arka ayrımı yapmadan normalize edilmiş bölge isimleri
+    const normalizeArea = (area: string): string => {
+      // Kalça, bacak (uyluk), diz, ayak bileği için ön/arka ayrımını kaldır
+      if (area.includes('hip')) return 'hip';
+      if (area.includes('thigh')) return 'thigh';
+      if (area.includes('knee')) return 'knee';
+      if (area.includes('ankle')) return 'ankle';
+      if (area.includes('calf')) return 'calf';
+      return area;
+    };
+    
+    const normalizedUserAreas = userPainAreas.map(normalizeArea);
+    
     const filtered = baseConfig.tests.filter((test) => {
       // Eğer test'in relevantBodyAreas'ı yoksa, tüm kullanıcılar için göster
       if (!test.relevantBodyAreas || test.relevantBodyAreas.length === 0) {
@@ -294,12 +268,15 @@ const ClinicalTestModal: React.FC<ClinicalTestModalProps> = ({ isOpen, onClose, 
       }
       
       // Test'in ilgili olduğu bölgelerle kullanıcının ağrılı bölgelerini karşılaştır
-      const hasRelevantPain = test.relevantBodyAreas.some((area) => 
-        userPainAreas.some((userArea) => {
-          // Tam eşleşme veya kısmi eşleşme kontrolü
-          return userArea.includes(area) || area.includes(userArea);
-        })
-      );
+      const hasRelevantPain = test.relevantBodyAreas.some((area) => {
+        const normalizedArea = normalizeArea(area);
+        return normalizedUserAreas.some((userArea) => {
+          // Normalize edilmiş bölgeleri karşılaştır
+          if (normalizedArea === userArea) return true;
+          // Tam eşleşme veya kısmi eşleşme kontrolü (diğer bölgeler için)
+          return userArea.includes(normalizedArea) || normalizedArea.includes(userArea);
+        });
+      });
       
       return hasRelevantPain;
     });
@@ -769,7 +746,7 @@ const ClinicalTestModal: React.FC<ClinicalTestModalProps> = ({ isOpen, onClose, 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {currentStep === 'instructions' && (
-            <div className={`grid gap-6 ${currentTest.id === 'squat' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+            <div className={`grid gap-6 ${currentTest.id === 'squat' || currentTest.id === 'calf-raise' || currentTest.id === 'heel-walk' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
               {/* Sol Sütun - Test Bilgileri ve Genel Talimatlar */}
               <div className="space-y-4">
                 {/* Test Başlığı */}
@@ -836,6 +813,80 @@ const ClinicalTestModal: React.FC<ClinicalTestModalProps> = ({ isOpen, onClose, 
                           <p className="text-4xl mb-3">🏋️</p>
                           <p className="text-sm opacity-90">Squat animasyonu yüklenecek</p>
                           <p className="text-xs opacity-70 mt-2">public/animations/squat-animation.mp4</p>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 text-center mt-3">
+                      Video otomatik olarak tekrar eder
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Sağ Sütun - Calf Raise Video (Sadece calf-raise testi için) */}
+              {currentTest.id === 'calf-raise' && (
+                <div className="flex flex-col">
+                  <div className="bg-white border-2 border-purple-200 rounded-xl p-4 shadow-lg flex-1 flex flex-col">
+                    <h4 className="text-lg font-bold text-gray-900 mb-4 text-center">
+                      🎥 Topuk Yükseltme Nasıl Yapılır?
+                    </h4>
+                    <div className="relative bg-black rounded-lg overflow-hidden aspect-video flex items-center justify-center">
+                      <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-contain"
+                        onError={() => {
+                          // Video yüklenemezse placeholder göster
+                        }}
+                      >
+                        <source src="/animations/calf-raise-animation.mp4" type="video/mp4" />
+                        <source src="/animations/calf-raise-animation.webm" type="video/webm" />
+                      </video>
+                      {/* Video yoksa placeholder */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900 to-blue-900 text-white">
+                        <div className="text-center p-6">
+                          <p className="text-4xl mb-3">🦵</p>
+                          <p className="text-sm opacity-90">Topuk Yükseltme animasyonu yüklenecek</p>
+                          <p className="text-xs opacity-70 mt-2">public/animations/calf-raise-animation.mp4</p>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 text-center mt-3">
+                      Video otomatik olarak tekrar eder
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Sağ Sütun - Heel Walk Video (Sadece heel-walk testi için) */}
+              {currentTest.id === 'heel-walk' && (
+                <div className="flex flex-col">
+                  <div className="bg-white border-2 border-purple-200 rounded-xl p-4 shadow-lg flex-1 flex flex-col">
+                    <h4 className="text-lg font-bold text-gray-900 mb-4 text-center">
+                      🎥 Topuk Üzerinde Yürüyüş Nasıl Yapılır?
+                    </h4>
+                    <div className="relative bg-black rounded-lg overflow-hidden aspect-video flex items-center justify-center">
+                      <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-contain"
+                        onError={() => {
+                          // Video yüklenemezse placeholder göster
+                        }}
+                      >
+                        <source src="/animations/heel-walk-animation.mp4" type="video/mp4" />
+                        <source src="/animations/heel-walk-animation.webm" type="video/webm" />
+                      </video>
+                      {/* Video yoksa placeholder */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900 to-blue-900 text-white">
+                        <div className="text-center p-6">
+                          <p className="text-4xl mb-3">🚶</p>
+                          <p className="text-sm opacity-90">Topuk Üzerinde Yürüyüş animasyonu yüklenecek</p>
+                          <p className="text-xs opacity-70 mt-2">public/animations/heel-walk-animation.mp4</p>
                         </div>
                       </div>
                     </div>
