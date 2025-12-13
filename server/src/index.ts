@@ -25,8 +25,8 @@ app.use(helmetConfig); // Güvenlik headers
 app.use(securityHeaders); // Ek güvenlik headers
 app.use(corsConfig); // CORS
 app.use(compression()); // Performans: Gzip compression
-app.use(express.json({ limit: '10mb' })); // Body parser
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' })); // Body parser - Fotoğraflar için artırıldı
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(sanitizeInput); // XSS koruması
 
 // Logging (development'ta detaylı, production'da minimal)
